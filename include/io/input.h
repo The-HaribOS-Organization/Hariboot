@@ -8,7 +8,6 @@ Ce fichier contient tous les prototypes de fonctions permettant de récupérer d
 #include <efi.h>
 #include <efilib.h>
 
-
 EFI_STATUS resetKeyboard(EFI_SYSTEM_TABLE *SystemTable);
 
 #endif

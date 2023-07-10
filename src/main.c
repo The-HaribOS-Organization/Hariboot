@@ -1,7 +1,10 @@
 #include <efi.h>
 #include <efilib.h>
-#include <graphics/gop.h>
-#include <io/output.h>
+
+#include "graphics/gop.h"
+#include "graphics/shapes.h"
+
+#include "io/output.h"
 
 
 EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
@@ -17,8 +20,9 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
     Gop = locateGOP(SystemTable);
     setVideoMode(SystemTable, Gop, 0x2);
 
-    for (UINT8 i = 0; i < 120; i++) {
-        *((UINT32 *)(Gop->Mode->FrameBufferBase + Gop->Mode->Info->PixelsPerScanLine * (i+1) + i)) = 0xFF00FF;
+    for (uint8_t i = 0; i < 120; i++) {
+        drawPoint_32bpp(Gop, 50, 50 + i, 0xFF00FF);
+        drawPoint_32bpp(Gop, 50 + i, 50, 0xFF00FF);
     }
 
     while ((Status = SystemTable->ConIn->ReadKeyStroke(SystemTable->ConIn, &Key)) == EFI_NOT_READY);

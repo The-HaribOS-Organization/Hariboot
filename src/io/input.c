@@ -1,9 +1,7 @@
-#include <efi.h>
-#include <efilib.h>
+#include "io/input.h"
 
-
-EFI_STATUS resetKeyboard(EFI_SYSTEM_TABLE *SystemTable) {
-
+EFI_STATUS resetKeyboard(EFI_SYSTEM_TABLE *SystemTable){
+    
     EFI_STATUS status = SystemTable->ConIn->Reset(SystemTable->ConIn, 1);
 
     if (status == EFI_SUCCESS) {

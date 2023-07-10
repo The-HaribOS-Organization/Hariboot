@@ -1,7 +1,4 @@
-#include <efi.h>
-#include <efilib.h>
 #include <io/output.h>
-
 
 EFI_STATUS resetTerm(EFI_SYSTEM_TABLE *SystemTable) {
     
