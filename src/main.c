@@ -2,6 +2,7 @@
 #include <efilib.h>
 
 #include "graphics/gop.h"
+#include "graphics/colors.h"
 #include "graphics/shapes.h"
 
 #include "io/output.h"
@@ -20,10 +21,8 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
     Gop = locateGOP(SystemTable);
     setVideoMode(SystemTable, Gop, 0x2);
 
-    for (uint8_t i = 0; i < 120; i++) {
-        drawPoint_32bpp(Gop, 50, 50 + i, 0xFF00FF);
-        drawPoint_32bpp(Gop, 50 + i, 50, 0xFF00FF);
-    }
+    drawRect(Gop, (Vec2){50, 50}, (Vec2){150, 150}, COLOR_RED, 0);
+    drawRect(Gop, (Vec2){200, 50}, (Vec2){300, 150}, COLOR_GREEN, 1);
 
     while ((Status = SystemTable->ConIn->ReadKeyStroke(SystemTable->ConIn, &Key)) == EFI_NOT_READY);
 
