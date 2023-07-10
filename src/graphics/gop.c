@@ -1,7 +1,4 @@
-#include <efi.h>
-#include <efilib.h>
 #include <graphics/gop.h>
-
 
 EFI_GRAPHICS_OUTPUT_PROTOCOL *locateGOP(EFI_SYSTEM_TABLE *SystemTable) {
 
@@ -26,7 +23,7 @@ EFI_GRAPHICS_OUTPUT_PROTOCOL *locateGOP(EFI_SYSTEM_TABLE *SystemTable) {
 EFI_STATUS setVideoMode(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, UINT32 ModeNumber) {
     
     EFI_STATUS status = uefi_call_wrapper(
-        Gop->SetMode, 2, Gop, 0x10
+        Gop->SetMode, 2, Gop, 0x03d
     );
 
     if (status == EFI_SUCCESS)
