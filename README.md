@@ -12,8 +12,9 @@ The UEFI bootloader for the HaribOS operating system
 
 ## Compiling
 1. Clone the gnu-efi repository with this command `git clone https://git.code.sf.net/p/gnu-efi/code gnu-efi`
-2. In the Makefile, change the `GNU-EFI_LOCALIZATION` value to the folder you cloned the gnu-efi repository in.
-3. Use the  command `make` to build the system.
+2. In the `data.c` file located in the `gnu-efi/lib/` directory, you need to remove the 'LibStubStriCmp', 'LibStubMetaiMatch', and 'LibStubStrLwrUpr' references to avoid linking error.
+3. In the Makefile, change the `GNU-EFI_LOCALIZATION` value to the folder you cloned the gnu-efi repository in.
+4. Use the  command `make` to build the system.
 
 ## Running
 1. Clone the [OVMF binaries](https://github.com/The-HaribOS-Organization/OVMFbin).
