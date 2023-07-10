@@ -1,44 +1,47 @@
-CFLAGS = -target x86_64-unknown-windows -ffreestanding -fshort-wchar -mno-red-zone -Ignu-efi/inc -Ignu-efi/inc/x86_64 -Ignu-efi/inc/protocol -Iefi/include
+# User defined values
+GNU-EFI_LOCALIZATION = ./gnu-efi
+OVMF_LOCALIZATION = ../../OVMFbin
+
+# Compiler
+CXX = clang
+CXXFLAGS = -target x86_64-unknown-windows -ffreestanding -fshort-wchar -mno-red-zone
+INCLUDE_HEADERS = -I include -I $(GNU-EFI_LOCALIZATION)/inc -I $(GNU-EFI_LOCALIZATION)/inc/x86_64 -I $(GNU-EFI_LOCALIZATION)/inc/protocol
+
+# Files
+SRCS := $(wildcard src/*.c) $(wildcard src/**/*.c)
+OBJ_DIR := obj
+OBJS := $(patsubst src/%.c, $(OBJ_DIR)/%.o, $(SRCS))
+
+# Linker
 LDFLAGS = -target x86_64-unknown-windows -nostdlib -Wl,-entry:efi_main -Wl,-subsystem:efi_application -fuse-ld=lld-link
-OBJECTS = main.o \
-		  data.o \
-		  gop.o \
-		  output.o \
-		  input.o
 
-%.o: %.c
-	clang $(CFLAGS) -c -o $@ $<
-	mv $@ .
+all: $(OBJS) build iso
 
-%.efi: $(OBJECTS)
-	clang $(LDFLAGS) -o $@ $<
+$(OBJ_DIR)/%.o: src/%.c 
+	@ mkdir -p $(@D)
+	$(CXX) $(CXXFLAGS) $(INCLUDE_HEADERS) -c $< -o $@
 
-#all:
-#	clang $(CFLAGS) -c -o main.o efi/src/main.c
-#	clang $(CFLAGS) -c -o gop.o efi/src/gop/gop.c
-#	clang $(CFLAGS) -c -o data.o gnu-efi/lib/data.c
-#	mv main.o obj/main.o && mv gop.o obj/gop.o && mv data.o obj/data.o
-#	clang $(LDFLAGS) -o main.efi $(OBJECTS)
+build:
+	$(CXX) $(LDFLAGS) -o main.efi $(OBJS)
 
 iso:
-
-	mkdir iso
-	dd if=/dev/zero of=fat.img bs=1k count=1440
-	mformat -i fat.img -f 1440 ::
-	mmd -i fat.img ::/EFI
-	mmd -i fat.img ::/EFI/BOOT
-	mcopy -i fat.img main.efi ::/EFI/BOOT
+	mkdir -p iso 
+	dd if=/dev/zero of=fat.img bs=1k count=1440 
+	mformat -i fat.img -f 1440 :: 
+	mmd -i fat.img ::/EFI 
+	mmd -i fat.img ::/EFI/BOOT 
+	mcopy -i fat.img main.efi ::/EFI/BOOT 
+	mcopy -i fat.img startup.nsh ::
 	cp fat.img iso/
-	xorriso -as mkisofs -R -f -e fat.img -no-emul-boot -o myimage.iso iso
+	xorriso -as mkisofs -R -f -e fat.img -no-emul-boot -o iso/HaribOS.iso iso
+
+run:
+	qemu-system-x86_64 -drive file=iso/fat.img -m 256M -cpu qemu64 -drive if=pflash,format=raw,unit=0,file="$(OVMF_LOCALIZATION)/OVMF.fd",readonly=on -drive if=pflash,format=raw,unit=1,file="$(OVMF_LOCALIZATION)/OVMF_VARS-pure-efi.fd" -net none
 
 clean:
+	rm -rf $(OBJ_DIR)
+	rm -f main.efi
+	rm -f iso/fat.img
+	rm -f iso/HaribOS.iso
 
-	rm -rv main.*
-	rm -rv fat.img
-	rm -rv iso/
-	rm -rv myimage.iso
-	rm -rv obj/
-
-run-uefi:
-
-	qemu-system-x86_64 -L /usr/share/ovmf/x64/ -pflash /usr/share/ovmf/x64/OVMF.fd -cdrom myimage.iso -d int
+.PHONY: all run build iso clean
