@@ -1,4 +1,28 @@
-#include <graphics/gop.h>
+#include <efi.h>
+#include <efilib.h>
+#include "graphics/gop.h"
+
+
+EFI_GRAPHICS_OUTPUT_MODE_INFORMATION **getModeInfos(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, UINT32 ModeNumber) {
+
+    EFI_STATUS Status;
+    static EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *ModeInfos;
+    UINTN SizeOfInfos = sizeof ModeInfos;
+
+    for (UINT32 i = 0; i < ModeNumber; i++) {
+        Status = Gop->QueryMode(
+            Gop, i, &SizeOfInfos, &ModeInfos
+        );
+
+        if (Status == EFI_SUCCESS) {
+            SystemTable->ConOut->OutputString(
+                SystemTable->ConOut, L"Mode detecte\r\n"
+            );
+        }
+    }
+
+    return &ModeInfos;
+}
 
 EFI_GRAPHICS_OUTPUT_PROTOCOL *locateGOP(EFI_SYSTEM_TABLE *SystemTable) {
 
