@@ -1,5 +1,6 @@
 #include <efi.h>
 #include <efilib.h>
+#include "memory/mmap.h"
 
 
 EFI_STATUS allocPool(EFI_SYSTEM_TABLE *SystemTable, EFI_MEMORY_TYPE Type, UINTN Size, void **Buffer) {

@@ -3,6 +3,9 @@
 #include "graphics/drawing.h"
 
 
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
 void drawPoint_32bpp(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 position, Vec3 pixel) {
     
     UINT32 color = (pixel.red << 16) + (pixel.green << 8) + pixel.blue;
@@ -29,22 +32,24 @@ void drawLine(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 posA, Vec2 posB, Vec3 pixe
     }
 }
 
-void drawLinearGradient(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, LinearGradient gradient, UINT32 start, UINT32 end) {
+void fillScreenGradient(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop) {
 
-    /*UINT32 Color = 0, Red = 0, Green = 0, Blue = 0;
-    
-    for (UINT32 i = start; i < end; i++) {
-        Red = ((LinearGradient.firstColor + (LinearGradient.secondColor - LinearGradient.firstColor)) * (1 / end - start));
-        Green = ((LinearGradient.secondColor + (LinearGradient.firstColor - LinearGradient.secondColor)) * (1 / end - start));
-        Blue = ((LinearGradient.secondColor + (LinearGradient.secondColor - LinearGradient.firstColor)) * (1 / end - start));
+    Vec3 Colors;
+    for (UINT32 i = 0; i < Gop->Mode->Info->HorizontalResolution; i++) {
+        for (UINT32 j = 0; j < Gop->Mode->Info->VerticalResolution; j++) { 
 
-        Color = (Red << 16) & (Green << 8) & Blue;
-        drawPoint_32bpp(Gop, (Vec2){i, 50}, Color);
-    }*/
-    return;
+            Colors.red = 0x77;//(UINT32)(min((i / (Gop->Mode->Info->HorizontalResolution / 256)), 255));
+            Colors.green = (UINT32)(MIN((j / (Gop->Mode->Info->VerticalResolution / 256)), 255));
+            Colors.blue = (UINT32)(MIN((i / (Gop->Mode->Info->HorizontalResolution / 256)), 255));
+
+            drawPoint_32bpp(Gop, (Vec2){i, j}, Colors);
+        }
+    }
 }
 
 void drawRect(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 posUpperLeft, Vec2 posDownRight, Vec3 pixel, BOOLEAN rectType) {
+
+    Vec3 ColorsRead, ColorsWrite;
     
     if (rectType == FALSE) {
         UINT32 dx = posDownRight.x - posUpperLeft.x;
@@ -59,10 +64,26 @@ void drawRect(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 posUpperLeft, Vec2 posDown
         
         for (UINT32 y = posUpperLeft.y; y < posDownRight.y; ++y) {
             for (UINT32 x = posUpperLeft.x; x < posDownRight.x; ++x) {
-                
-                drawPoint_32bpp(gop, (Vec2){x, y}, pixel);
+                ColorsRead = getPixelValue(gop, (Vec2){x, y});
+                ColorsWrite.red = (ColorsRead.red * pixel.alpha + pixel.red * (255 - pixel.alpha)) / 255;
+                ColorsWrite.green = (ColorsRead.green * pixel.alpha + pixel.green * (255 - pixel.alpha)) / 255;
+                ColorsWrite.blue = (ColorsRead.blue * pixel.alpha + pixel.blue * (255 - pixel.alpha)) / 255;
+                drawPoint_32bpp(gop, (Vec2){x, y}, ColorsWrite);
             }
         }
     }
     // filled
+}
+
+Vec3 getPixelValue(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec2 position) {
+
+    UINT32 color;
+    Vec3 Colors;
+    color = *((UINT32*)(Gop->Mode->FrameBufferBase + (4 * Gop->Mode->Info->PixelsPerScanLine * position.y) + (4 * position.x)));
+
+    Colors.red = (color >> 16) & 0xFF;
+    Colors.green = (color >> 8) & 0xFF;
+    Colors.blue = color & 0xFF;
+    
+    return Colors;
 }

@@ -23,15 +23,10 @@ typedef struct Vec3 {
     UINT8 alpha;
 } Vec3;
 
-typedef struct LinearGradient {
-    UINT32 firstColor;
-    UINT32 secondColor;
-} LinearGradient;
 
-
+void fillScreenGradient(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop);
 void drawPoint_32bpp(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 position, Vec3 pixel);
 void drawLine(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 posA, Vec2 posB, Vec3 pixel);
-void drawLinearGradient(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, LinearGradient gradient, UINT32 start, UINT32 end);
 
 /*
 rectType
@@ -40,5 +35,6 @@ rectType
 */
 
 void drawRect(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 posUpperLeft, Vec2 posDownRight, Vec3 pixel, BOOLEAN rectType);
+Vec3 getPixelValue(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec2 position);
 
 #endif // SHAPES_H_INCLUDED

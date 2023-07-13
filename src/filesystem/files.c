@@ -1,9 +1,13 @@
 #include <efi.h>
 #include <efilib.h>
 #include "filesystem/files.h"
+#include "memory/mmap.h"
 
 
-EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *initFileSystem(EFI_SYSTEM_TABLE *SystemTable, EFI_HANDLE Image) {
+static EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *Volume;
+
+
+void initFileSystem(EFI_SYSTEM_TABLE *SystemTable, EFI_HANDLE Image) {
 
     EFI_STATUS Status;
     EFI_GUID LoadedImageGUID = EFI_LOADED_IMAGE_PROTOCOL_GUID;
@@ -11,7 +15,6 @@ EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *initFileSystem(EFI_SYSTEM_TABLE *SystemTable, E
     EFI_GUID fsProtocol = EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID;
     EFI_LOADED_IMAGE_PROTOCOL *ImageLoaded;
     EFI_DEVICE_PATH_PROTOCOL *DevicePath;
-    EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *Volume;
 
     Status = SystemTable->BootServices->HandleProtocol(Image, &LoadedImageGUID, (void **)&ImageLoaded);
     if (Status != EFI_SUCCESS)
@@ -24,30 +27,20 @@ EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *initFileSystem(EFI_SYSTEM_TABLE *SystemTable, E
     Status = SystemTable->BootServices->HandleProtocol(ImageLoaded->DeviceHandle, &fsProtocol, (void **)&Volume);
     if (Status != EFI_SUCCESS)
         SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Erreur lors de l'initialisation du systeme de fichiers.\r\n");
-
-    return Volume;
 }
 
-EFI_FILE_PROTOCOL *openVolume(EFI_SYSTEM_TABLE *SystemTable, EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *Volume) {
 
-    EFI_FILE_PROTOCOL *File;
+EFI_FILE_PROTOCOL *openFile(EFI_SYSTEM_TABLE *SystemTable, CHAR16 *Filename) {
+
     EFI_STATUS Status;
+    EFI_FILE_PROTOCOL *FileHandle, *RootVolume;
 
-    Status = Volume->OpenVolume(Volume, &File);
+    Status = Volume->OpenVolume(Volume, &RootVolume);
     if (Status != EFI_SUCCESS)
         SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Erreur lors de l'ouverture du volume");
 
-    return File;
-}
-
-
-EFI_FILE_PROTOCOL *openFile(EFI_SYSTEM_TABLE *SystemTable, EFI_FILE_PROTOCOL *Volume, CHAR16 *Filename) {
-
-    EFI_STATUS Status;
-    EFI_FILE_PROTOCOL *FileHandle;
-
-    Status = Volume->Open(
-        Volume, &FileHandle, Filename, EFI_FILE_MODE_READ, EFI_FILE_READ_ONLY | EFI_FILE_HIDDEN | EFI_FILE_SYSTEM
+    Status = RootVolume->Open(
+        RootVolume, &FileHandle, Filename, EFI_FILE_MODE_READ, EFI_FILE_READ_ONLY | EFI_FILE_HIDDEN | EFI_FILE_SYSTEM
     );
 
     switch (Status) {
@@ -88,10 +81,14 @@ EFI_FILE_PROTOCOL *openFile(EFI_SYSTEM_TABLE *SystemTable, EFI_FILE_PROTOCOL *Vo
     return FileHandle;
 }
 
-CHAR16 *readFile(EFI_SYSTEM_TABLE *SystemTable, EFI_FILE_PROTOCOL *File, UINTN Size) {
+void *readFile(EFI_SYSTEM_TABLE *SystemTable, EFI_FILE_PROTOCOL *File, UINTN Size) {
 
-    CHAR16 *Buffer;
+    void *Buffer;
     EFI_STATUS Status;
+
+    Status = allocPool(SystemTable, EfiLoaderData, Size, (void **)&Buffer);
+    if (Status != EFI_SUCCESS)
+        SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Erreur lors de l'allocation de la pool.\r\n");
 
     Status = File->Read(File, &Size, Buffer);
     if (Status != EFI_SUCCESS)
