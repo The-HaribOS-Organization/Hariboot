@@ -13,5 +13,5 @@ permettant de quitter UEFI ou encore de quitter un service.
 void ResetSystemCold(EFI_SYSTEM_TABLE *SystemTable, EFI_STATUS Status, UINTN DataSize, void *Datas);
 void ResetSystemWarm(EFI_SYSTEM_TABLE *SystemTable, EFI_STATUS Status, UINTN DataSize, void *Datas);
 void Shutdown(EFI_SYSTEM_TABLE *SystemTable, EFI_STATUS Status, UINTN DataSize, void *Datas);
-
+EFI_STATUS exitBServices(EFI_SYSTEM_TABLE *SystemTable, EFI_HANDLE Handle, UINTN MapKey);
 #endif

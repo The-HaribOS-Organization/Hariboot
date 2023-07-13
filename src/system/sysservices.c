@@ -23,3 +23,11 @@ void Shutdown(EFI_SYSTEM_TABLE *SystemTable, EFI_STATUS Status, UINTN DataSize, 
         EfiResetShutdown, EFI_SUCCESS, DataSize, Datas
     );
 }
+
+EFI_STATUS exitBServices(EFI_SYSTEM_TABLE *SystemTable, EFI_HANDLE Handle, UINTN MapKey) {
+
+    EFI_STATUS Status;
+    Status = SystemTable->BootServices->ExitBootServices(Handle, MapKey);
+    
+    return Status;
+}
