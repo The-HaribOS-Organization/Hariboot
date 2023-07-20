@@ -31,7 +31,6 @@ enum vga_color {
 
 EFI_STATUS resetTerm(EFI_SYSTEM_TABLE *SystemTable);
 EFI_STATUS setCursorPos(EFI_SYSTEM_TABLE *SystemTable, UINTN x, UINTN y);
-EFI_STATUS clearTerminal(EFI_SYSTEM_TABLE *SystemTable);
 EFI_STATUS enadisCursor(EFI_SYSTEM_TABLE *SystemTable, BOOLEAN onff);
 EFI_STATUS setBackForeColor(EFI_SYSTEM_TABLE *SystemTable, UINT8 Fg, UINT8 Bg);
 

@@ -2,10 +2,10 @@
 #include "memory/mem.h"
 
 
-void *memcpy(EFI_PHYSICAL_ADDRESS *srcPtr, EFI_PHYSICAL_ADDRESS *destPtr, UINTN size) {
+void *memcpy(void *srcPtr, void *destPtr, UINTN size) {
 
-    EFI_PHYSICAL_ADDRESS *dest = (EFI_PHYSICAL_ADDRESS *)destPtr;
-    EFI_PHYSICAL_ADDRESS *src = (EFI_PHYSICAL_ADDRESS *)srcPtr;
+    UINT8 *dest = (UINT8 *)destPtr;
+    UINT8 *src = (UINT8 *)srcPtr;
     for (UINTN i = 0; i < size; i++) {
         dest[i] = src[i];
     }
