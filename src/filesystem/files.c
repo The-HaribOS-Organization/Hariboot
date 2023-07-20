@@ -4,8 +4,8 @@
 #include "memory/mmap.h"
 
 
-static EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *Volume;
-
+EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *Volume;
+EFI_FILE_PROTOCOL *RootVolume;
 
 void initFileSystem(EFI_SYSTEM_TABLE *SystemTable, EFI_HANDLE Image) {
 
@@ -27,20 +27,20 @@ void initFileSystem(EFI_SYSTEM_TABLE *SystemTable, EFI_HANDLE Image) {
     Status = SystemTable->BootServices->HandleProtocol(ImageLoaded->DeviceHandle, &fsProtocol, (void **)&Volume);
     if (Status != EFI_SUCCESS)
         SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Erreur lors de l'initialisation du systeme de fichiers.\r\n");
+
+    Status = Volume->OpenVolume(Volume, &RootVolume);
+    if (Status != EFI_SUCCESS)
+        SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Erreur lors de l'ouverture du volume");
 }
 
 
 EFI_FILE_PROTOCOL *openFile(EFI_SYSTEM_TABLE *SystemTable, CHAR16 *Filename) {
 
     EFI_STATUS Status;
-    EFI_FILE_PROTOCOL *FileHandle, *RootVolume;
-
-    Status = Volume->OpenVolume(Volume, &RootVolume);
-    if (Status != EFI_SUCCESS)
-        SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Erreur lors de l'ouverture du volume");
+    EFI_FILE_PROTOCOL *FileHandle;
 
     Status = RootVolume->Open(
-        RootVolume, &FileHandle, Filename, EFI_FILE_MODE_READ, EFI_FILE_READ_ONLY | EFI_FILE_HIDDEN | EFI_FILE_SYSTEM
+        RootVolume, &FileHandle, Filename, EFI_FILE_MODE_READ, 0
     );
 
     switch (Status) {
@@ -86,9 +86,9 @@ void *readFile(EFI_SYSTEM_TABLE *SystemTable, EFI_FILE_PROTOCOL *File, UINTN Siz
     void *Buffer;
     EFI_STATUS Status;
 
-    Status = allocPool(SystemTable, EfiLoaderData, Size, (void **)&Buffer);
-    if (Status != EFI_SUCCESS)
-        SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Erreur lors de l'allocation de la pool.\r\n");
+    Status = SystemTable->BootServices->AllocatePool(
+        EfiLoaderData, Size, (void **)&Buffer
+    );
 
     Status = File->Read(File, &Size, Buffer);
     if (Status != EFI_SUCCESS)
@@ -123,4 +123,14 @@ void closeFile(EFI_SYSTEM_TABLE *SystemTable, EFI_FILE_PROTOCOL *File) {
 
     if (Status == EFI_SUCCESS)
         SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Fichier ferme avec succes.\r\n");
+}
+
+UINT64 getSizeFile(EFI_FILE_PROTOCOL *File) {
+
+    UINT64 Size = 0;
+    File->SetPosition(File, 0xFFFFFFFFFFFFFFFF);
+    File->GetPosition(File, &Size);
+    File->SetPosition(File, 0x0);
+
+    return Size;
 }

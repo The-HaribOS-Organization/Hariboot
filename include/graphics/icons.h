@@ -8,14 +8,14 @@ d'afficher des images à l'écran.
 
 #include <efi.h>
 #include <efilib.h>
+#include "graphics/drawing.h"
+
 
 typedef struct BitmapHeader {
-
     UINT16 HeaderField;
     UINT32 Size;
-    UINT16 Reserved0, Reserved1;
+    UINT16 Reserved[2];
     UINT32 OffsetPixelArray;
-    
     UINT32 HeaderSize;
     UINT32 BitmapWidth;
     UINT32 BitmapHeight;
@@ -36,8 +36,10 @@ typedef struct BitmapHeader {
     UINT32 HalftoningParameter2;
     UINT32 ColorEncoding;
     UINT32 ApplicationDefinedIdentifier;
-} BitmapHeader;
+} BitmapHeader_t;
 
-BitmapHeader getBitmapHeader(EFI_SYSTEM_TABLE *SystemTable, CHAR16 *Filename);
+UINT8 *readBitmapHeader(EFI_SYSTEM_TABLE *SystemTable, CHAR16 *Filename);
+BitmapHeader_t *parseBitmapHeader(EFI_SYSTEM_TABLE *SystemTable, UINT8 *bitmapArray);
+void showIcon(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec2 Position, Vec2 IconSize);
 
 #endif

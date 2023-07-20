@@ -3,11 +3,12 @@
 #include "memory/mmap.h"
 
 
-EFI_STATUS allocPool(EFI_SYSTEM_TABLE *SystemTable, EFI_MEMORY_TYPE Type, UINTN Size, void **Buffer) {
+void *allocPool(EFI_SYSTEM_TABLE *SystemTable, EFI_MEMORY_TYPE Type, UINTN Size) {
 
+    void *Buffer;
     EFI_STATUS Status;
     Status = SystemTable->BootServices->AllocatePool(
-        Type, Size, Buffer
+        Type, Size, (void **)&Buffer
     );
 
     if (Status != EFI_SUCCESS)
@@ -15,31 +16,36 @@ EFI_STATUS allocPool(EFI_SYSTEM_TABLE *SystemTable, EFI_MEMORY_TYPE Type, UINTN 
             SystemTable->ConOut, L"Une erreur est survenue, veuillez verifier le code d'erreur retourne.\r\n"
         );
     
-    return Status;
+    return Buffer;
 }
 
 void freePool(EFI_SYSTEM_TABLE *SystemTable, void *Buffer) {
 
+    Buffer = (void *)Buffer;
     EFI_STATUS Status;
     Status = SystemTable->BootServices->FreePool(Buffer);
 
-    if (Status == EFI_SUCCESS)
-        SystemTable->ConOut->OutputString(
-            SystemTable->ConOut, L"Operation deroule avec succes.\r\n"
-        );
-    else
+    if (Status != EFI_SUCCESS)
         SystemTable->ConOut->OutputString(
             SystemTable->ConOut, L"Le buffer est invalide.\r\n"
         );
 }
 
-EFI_MEMORY_DESCRIPTOR *getMmap(EFI_SYSTEM_TABLE* SystemTable, UINTN *MapKey, UINTN *DescriptorSize, UINT32 *DescriptorVersion) {
+EFI_MEMORY_DESCRIPTOR *getMmap(EFI_SYSTEM_TABLE* SystemTable, UINTN DescriptorSize, UINT32 DescriptorVersion) {
 
+    EFI_STATUS Status;
     EFI_MEMORY_DESCRIPTOR *MMap;
-    UINTN MMapSize = 20; // Une taille au hasard juste pour le délire.
+    UINTN MMapSize = 0;
+    UINTN MapKey;
 
     SystemTable->BootServices->GetMemoryMap(
-        &MMapSize, MMap, MapKey, DescriptorSize, DescriptorVersion
+        &MMapSize, MMap, &MapKey, &DescriptorSize, &DescriptorVersion
+    );
+
+    MMapSize += 2 * DescriptorSize;
+    allocPool(SystemTable, EfiLoaderData, MMapSize);
+    SystemTable->BootServices->GetMemoryMap(
+        &MMapSize, MMap, &MapKey, &DescriptorSize, &DescriptorVersion
     );
 
     return MMap;
