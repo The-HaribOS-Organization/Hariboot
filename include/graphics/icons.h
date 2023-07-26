@@ -40,6 +40,6 @@ typedef struct BitmapHeader {
 
 UINT8 *readBitmapHeader(EFI_SYSTEM_TABLE *SystemTable, CHAR16 *Filename);
 BitmapHeader_t *parseBitmapHeader(EFI_SYSTEM_TABLE *SystemTable, UINT8 *bitmapArray);
-void showIcon(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec2 Position, Vec2 IconSize);
+void showIcon(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec2 Position, Vec2 IconSize, CHAR16 *BitmapName);
 
 #endif

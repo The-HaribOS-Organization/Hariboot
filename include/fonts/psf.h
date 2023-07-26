@@ -7,7 +7,7 @@ un fichier .psf et d'afficher des caractères à l'aide de cette font.
 #define _PSF_
 
 #include <efi.h>
-#include <eflib.h>
+#include <efilib.h>
 #include "graphics/drawing.h"
 
 #define PSF_MODE_512 0x01
@@ -20,6 +20,7 @@ typedef struct PSF1_Font {
     UINT8 glyphSize;
 } PSF1_Font_t;
 
-
+UINT8 *getPSFFontFile(EFI_SYSTEM_TABLE *SystemTable, CHAR16 *FontName);
+PSF1_Font_t *parseFontFile(EFI_SYSTEM_TABLE *SystemTable, UINT8 *FontArray);
 
 #endif

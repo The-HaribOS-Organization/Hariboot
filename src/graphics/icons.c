@@ -3,10 +3,17 @@
 #include "graphics/icons.h"
 #include "graphics/drawing.h"
 #include "memory/mmap.h"
-#include "memory/mem.h"
 #include "filesystem/files.h"
 #include "io/output.h"
 
+
+static inline BOOLEAN isBitmap(BitmapHeader_t *header) {
+
+    if (header->HeaderField == 0x424D)
+        return TRUE;
+    else
+        return FALSE;
+}
 
 UINT8 *readBitmapHeader(EFI_SYSTEM_TABLE *SystemTable, CHAR16 *Filename) {
 
@@ -60,26 +67,31 @@ BitmapHeader_t *parseBitmapHeader(EFI_SYSTEM_TABLE *SystemTable, UINT8 *bitmapAr
     return bitmapHeader;
 }
 
-void showIcon(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec2 Position, Vec2 IconSize) {
+void showIcon(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec2 Position, Vec2 IconSize, CHAR16 *BitmapName) {
 
     Vec3 pixelValue;
-    UINT8 *headerArray = readBitmapHeader(SystemTable, L"Hariboot.bmp");
+    UINT8 *headerArray = readBitmapHeader(SystemTable, BitmapName);
     BitmapHeader_t *bheader = parseBitmapHeader(SystemTable, headerArray);
 
-    for (UINT32 i = (Position.y + IconSize.y); i > Position.y; i--) {
+    if (isBitmap(bheader)) {
 
-        UINT8 *bitmapRow = (headerArray + 0x8A) + (i - Position.y) * 391 * 4;
-        UINT32 offset = 0;
-        for (UINT32 j = Position.x; j < (Position.x + IconSize.x); j++) {
+        for (UINT32 i = (Position.y + (IconSize.y -1)); i > Position.y; i--) {
 
-            pixelValue.blue = bitmapRow[offset++] & 0xFF;
-            pixelValue.green = bitmapRow[offset++] & 0xFF;
-            pixelValue.red = bitmapRow[offset++] & 0xFF;
-            pixelValue.alpha = bitmapRow[offset++] & 0xFF;
-            drawPoint_32bpp(Gop, (Vec2){j, i}, pixelValue);
+            UINT8 *bitmapRow = (headerArray + headerArray[10]) + (i - Position.y) * IconSize.x * 4;//headerArray[0x1E];
+            UINT32 offset = 0;
+            for (UINT32 j = Position.x; j < (Position.x + IconSize.x); j++) {
+
+                pixelValue.blue = bitmapRow[offset++] & 0xFF;
+                pixelValue.green = bitmapRow[offset++] & 0xFF;
+                pixelValue.red = bitmapRow[offset++] & 0xFF;
+                pixelValue.alpha = bitmapRow[offset++] & 0xFF;
+                drawPoint_32bpp(Gop, (Vec2){j, i}, ((pixelValue.red << 16) + (pixelValue.green << 8) + pixelValue.blue));
+            }
         }
-    }
 
-    freePool(SystemTable, headerArray);
-    freePool(SystemTable, bheader);
+        freePool(SystemTable, headerArray);
+        freePool(SystemTable, bheader);
+    } else {
+        return;
+    }
 }
