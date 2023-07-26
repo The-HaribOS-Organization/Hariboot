@@ -17,7 +17,7 @@ void ResetSystemWarm(EFI_SYSTEM_TABLE *SystemTable, EFI_STATUS Status, UINTN Dat
     );
 }
 
-void Shutdown(EFI_SYSTEM_TABLE *SystemTable, EFI_STATUS Status, UINTN DataSize, void *Datas) {
+void Shutdown(EFI_SYSTEM_TABLE *SystemTable, UINTN DataSize, void *Datas) {
     
     SystemTable->RuntimeServices->ResetSystem(
         EfiResetShutdown, EFI_SUCCESS, DataSize, Datas

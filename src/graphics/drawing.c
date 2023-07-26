@@ -6,6 +6,8 @@
 #include "system/stall.h"
 
 
+int _fltused = 0;
+
 UINT8 g_8x16_font[4096] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x7E, 0x81, 0xA5, 0x81, 0x81, 0xBD, 0x99, 0x81, 0x81, 0x7E, 0x00, 0x00, 0x00, 0x00, 
@@ -273,30 +275,23 @@ EFI_PHYSICAL_ADDRESS *allocBuffer(EFI_SYSTEM_TABLE *SystemTable, Vec2 ScreenSize
 	return Buffer;
 }
 
-void drawPoint_32bpp(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 position, Vec3 pixel) {
-    
-    UINT32 color = (pixel.red << 16) + (pixel.green << 8) + pixel.blue;
+static inline void drawPoint_32bpp(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 position, UINT32 color) {
+
     *((UINT32*)(gop->Mode->FrameBufferBase + (4 * gop->Mode->Info->PixelsPerScanLine * position.y) + (4 * position.x))) = color;
 }
 
-void drawLine(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec2 posA, Vec2 posB, Vec3 pixel) {
-    UINT32 dx = posB.x - posA.x;
-    UINT32 dy = posB.y - posA.y;
+static inline void drawChar(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, CHAR8 character, Vec2 position, UINT32 foregroundColor) {
 
-    if (posA.x != posB.x) {
-        for (UINT32 x = posA.x; x < posB.x; ++x) {
+	Vec3 Colors;
+	INT32 mask[8] = {128, 64, 32, 16, 8, 4, 2, 1};
+	UINT8 *glyph = g_8x16_font + (INT32)character * 16;
 
-            UINT32 y = posA.y + dy * (x - posA.x) / dx;
-            drawPoint_32bpp(Gop, (Vec2){x, y}, pixel);
-        }
-    }
-    else {
-        for (UINT32 y = posA.y; y < posB.y; ++y) {
-
-            UINT32 x = posA.x + dx * (y - posA.y) / dy;
-            drawPoint_32bpp(Gop, (Vec2){x, y}, pixel);
-        }
-    }
+	for (UINT8 cy = 0; cy < 16; cy++) {
+		for (UINT8 cx = 0; cx < 8; cx++) {
+			Colors = getPixelValue(Gop, (Vec2){position.x + cx, position.y + cy});
+			drawPoint_32bpp(Gop, (Vec2){(position.x + cx), ((position.y + cy))}, glyph[cy]&mask[cx]?foregroundColor:((Colors.red << 16) + (Colors.green << 8) + Colors.blue));
+		}
+	}
 }
 
 void fillScreenGradient(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop) {
@@ -309,7 +304,27 @@ void fillScreenGradient(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop) {
             Colors.green = 0x77;//(UINT32)(MIN((j / (Gop->Mode->Info->VerticalResolution / 256)), 0));
             Colors.blue = (UINT32)(MIN((j / (Gop->Mode->Info->VerticalResolution / 256)), 255));
 
-            drawPoint_32bpp(Gop, (Vec2){i, j}, Colors);
+            drawPoint_32bpp(Gop, (Vec2){i, j}, ((Colors.red << 16) + (Colors.green << 8) + Colors.blue));
+        }
+    }
+}
+
+void drawLine(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec2 posA, Vec2 posB, Vec3 pixel) {
+    UINT32 dx = posB.x - posA.x;
+    UINT32 dy = posB.y - posA.y;
+
+    if (posA.x != posB.x) {
+        for (UINT32 x = posA.x; x < posB.x; ++x) {
+
+            UINT32 y = posA.y + dy * (x - posA.x) / dx;
+            drawPoint_32bpp(Gop, (Vec2){x, y}, ((pixel.red << 16) + (pixel.green << 8) + pixel.blue));
+        }
+    }
+    else {
+        for (UINT32 y = posA.y; y < posB.y; ++y) {
+
+            UINT32 x = posA.x + dx * (y - posA.y) / dy;
+            drawPoint_32bpp(Gop, (Vec2){x, y}, ((pixel.red << 16) + (pixel.green << 8) + pixel.blue));
         }
     }
 }
@@ -335,11 +350,19 @@ void drawRect(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 posUpperLeft, Vec2 posDown
                 ColorsWrite.red = (ColorsRead.red * pixel.alpha + pixel.red * (255 - pixel.alpha)) / 255;
                 ColorsWrite.green = (ColorsRead.green * pixel.alpha + pixel.green * (255 - pixel.alpha)) / 255;
                 ColorsWrite.blue = (ColorsRead.blue * pixel.alpha + pixel.blue * (255 - pixel.alpha)) / 255;
-                drawPoint_32bpp(gop, (Vec2){x, y}, ColorsWrite);
+                drawPoint_32bpp(gop, (Vec2){x, y}, ((ColorsWrite.red << 16) + (ColorsWrite.green << 8) + ColorsWrite.blue));
             }
         }
     }
     // filled
+}
+
+void drawString(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, CHAR8 *string, Vec2 position, Vec3 color) {
+	
+	for (UINT16 i = 0; i < strlen(string); i++) {
+		drawChar(Gop, string[i], position, ((color.red << 16) + (color.green << 8) + color.blue));
+		position.x += 8;
+	}
 }
 
 Vec3 getPixelValue(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec2 position) {
@@ -353,26 +376,4 @@ Vec3 getPixelValue(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec2 position) {
     Colors.blue = color & 0xFF;
     
     return Colors;
-}
-
-void drawChar(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, CHAR8 character, Vec2 position, UINT32 color) {
-
-	Vec3 Colors;
-	INT32 mask[8] = {128, 64, 32, 16, 8, 4, 2, 1};
-	UINT8 *glyph = g_8x16_font + (INT32)character * 16;
-
-	for (UINT8 cy = 0; cy < 16; cy++) {
-		for (UINT8 cx = 0; cx < 8; cx++) {
-			Colors = getPixelValue(Gop, (Vec2){position.x + cx, position.y + cy});
-			drawPoint_32bpp(Gop, (Vec2){(position.x + cx), ((position.y + cy)) + 12}, (Vec3){glyph[cy]&mask[cx]?(color << 16):Colors.red, glyph[cy]&mask[cx]?(color << 8):Colors.green, glyph[cy]&mask[cx]?color:Colors.blue});
-		}
-	}
-}
-
-void drawString(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, CHAR8 *string, Vec2 position, Vec3 color) {
-	
-	for (UINT16 i = 0; i < strlen(string); i++) {
-		drawChar(Gop, string[i], position, ((color.red << 16) + (color.green << 8) + color.blue));
-		position.x += 8;
-	}
 }
