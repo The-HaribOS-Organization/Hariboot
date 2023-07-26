@@ -1,7 +1,9 @@
-# Hariboot
 <p align="center">
   <h1><strong>Hariboot</strong></h1>
-  <br>
+</p>
+
+<br/>
+<p align="center">
   <img src="https://github.com/The-HaribOS-Organization/Hariboot/blob/main/logo.png?raw=true" />
 </p>
 
