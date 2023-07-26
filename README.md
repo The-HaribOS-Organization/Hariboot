@@ -1,6 +1,6 @@
 <center>
   # Hariboot
-  <img src="images/Boot.png"/>
+  ![alt text](https://github.com/The-HaribOS-Organization/Hariboot/blob/main/images/Boot.png?raw=true)
 </center>
 The UEFI bootloader for the HaribOS operating system
 
