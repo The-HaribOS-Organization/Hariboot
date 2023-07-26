@@ -1,4 +1,7 @@
-# Hariboot
+<center>
+  # Hariboot
+  <img src="images/Boot.png"/>
+</center>
 The UEFI bootloader for the HaribOS operating system
 
 ## To Install
