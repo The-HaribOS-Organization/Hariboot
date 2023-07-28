@@ -34,7 +34,7 @@ iso:
 	mcopy -i fat.img startup.nsh ::
 	mcopy -i fat.img images/Boot.bmp ::
 	mcopy -i fat.img images/Hariboot.bmp ::
-	mcopy -i fat.img fonts/zap-light16.psf
+	mcopy -i fat.img fonts/zap-light16.psf ::
 
 	cp fat.img iso/
 	xorriso -as mkisofs -R -f -e fat.img -no-emul-boot -o iso/HaribOS.iso iso
