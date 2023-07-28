@@ -1,6 +1,6 @@
 # User defined values
-GNU-EFI_LOCALIZATION = gnu-efi
-OVMF_LOCALIZATION = ../OVMFbin
+GNU-EFI_LOCALIZATION = ../gnu-efi
+OVMF_LOCALIZATION = /usr/share/ovmf
 
 # Compiler
 CXX = clang
