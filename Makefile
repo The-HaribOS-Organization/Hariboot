@@ -1,6 +1,6 @@
 # User defined values
-GNU-EFI_LOCALIZATION = ../gnu-efi
-OVMF_LOCALIZATION = /usr/share/ovmf
+GNU-EFI_LOCALIZATION = gnu-efi
+OVMF_LOCALIZATION = ../OVMFbin
 
 # Compiler
 CXX = clang
@@ -32,6 +32,10 @@ iso:
 	mmd -i fat.img ::/EFI/BOOT
 	mcopy -i fat.img main.efi ::/EFI/BOOT
 	mcopy -i fat.img startup.nsh ::
+	mcopy -i fat.img images/Boot.bmp ::
+	mcopy -i fat.img images/Hariboot.bmp ::
+	mcopy -i fat.img fonts/zap-light16.psf
+
 	cp fat.img iso/
 	xorriso -as mkisofs -R -f -e fat.img -no-emul-boot -o iso/HaribOS.iso iso
 
