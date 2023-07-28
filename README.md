@@ -1,6 +1,4 @@
-<p align="center">
-  <h1><strong>Hariboot</strong></h1>
-</p>
+<h1 align="center"><strong>Hariboot</strong></h1>
 
 <br/>
 <p align="center">
