@@ -31,6 +31,35 @@ void freePool(EFI_SYSTEM_TABLE *SystemTable, void *Buffer) {
         );
 }
 
+EFI_PHYSICAL_ADDRESS allocPages(EFI_SYSTEM_TABLE *SystemTable, EFI_MEMORY_TYPE Type, UINTN Pages) {
+
+    EFI_STATUS Status;
+    EFI_PHYSICAL_ADDRESS Memory;
+
+    Status = SystemTable->BootServices->AllocatePages(
+        AllocateAnyPages, Type, Pages, &Memory);
+    if (Status != EFI_SUCCESS) {
+
+        SystemTable->ConOut->OutputString(
+            SystemTable->ConOut, L"Une erreur s'est produite, impossible d'allouer de la memoire virtuelle.\r\n");
+        return 0;
+    } else {
+        return Memory;
+    }
+}
+
+void freePages(EFI_SYSTEM_TABLE *SystemTable, EFI_PHYSICAL_ADDRESS Memory, UINTN Pages) {
+
+    EFI_STATUS Status;
+    Status = SystemTable->BootServices->FreePages(
+        Memory, Pages);
+
+    if (Status == EFI_NOT_FOUND)
+        SystemTable->ConOut->OutputString(
+            SystemTable->ConOut, L"Erreur, la page en memoire demande n'a pas ete alloue avec AllocatePages.\r\n");
+
+}
+
 EFI_MEMORY_DESCRIPTOR *getMmap(EFI_SYSTEM_TABLE* SystemTable, UINTN DescriptorSize, UINT32 DescriptorVersion) {
 
     EFI_STATUS Status;

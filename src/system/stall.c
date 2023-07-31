@@ -2,6 +2,29 @@
 #include <efilib.h>
 #include "system/stall.h"
 
+UINT8 atoi(const CHAR8 *string) {
+
+	UINT8 result = 0;
+	
+	for (UINTN i = 0; string[i] != '\0'; i++)
+		result = result * 10 + (string[i] - '0');
+
+	return result;
+}
+
+
+/* This function was taken from geeks for geeks and modified a little.*/
+UINTN strcmp(CHAR8 *firstString, CHAR8 *secondString) {
+
+	UINTN result = 0;
+
+	for (UINTN i = 0; firstString[i] != '\n'; i++) {
+		if (firstString[i] == secondString[i]) continue;
+		else result++;
+	}
+
+	return result;
+}
 
 void itoa(UINT32 number, CHAR16 *buffer, INT32 baseNumber) {
 	
