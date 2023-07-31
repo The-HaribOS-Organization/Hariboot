@@ -35,9 +35,10 @@ iso:
 	mmd -i fat.img ::/CONFIG
 	mcopy -i fat.img BOOTX64.EFI ::/EFI/BOOT
 	mcopy -i fat.img startup.nsh ::
-	mcopy -i fat.img images/Boot.bmp ::
 	mcopy -i fat.img loader/loader.bin ::/KERNEL
 	mcopy -i fat.img config/config.hariboot ::/CONFIG
+	mcopy -i fat.img images/Boot.bmp ::
+
 	cp fat.img iso/
 	xorriso -as mkisofs -R -f -e fat.img -no-emul-boot -o iso/HaribOS.iso iso
 
