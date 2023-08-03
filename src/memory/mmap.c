@@ -31,20 +31,18 @@ void freePool(EFI_SYSTEM_TABLE *SystemTable, void *Buffer) {
         );
 }
 
-EFI_PHYSICAL_ADDRESS allocPages(EFI_SYSTEM_TABLE *SystemTable, EFI_MEMORY_TYPE Type, UINTN Pages) {
+void allocPages(EFI_SYSTEM_TABLE *SystemTable, EFI_MEMORY_TYPE Type, UINTN Pages, EFI_PHYSICAL_ADDRESS *adress) {
 
     EFI_STATUS Status;
-    EFI_PHYSICAL_ADDRESS Memory;
 
     Status = SystemTable->BootServices->AllocatePages(
-        AllocateAnyPages, Type, Pages, &Memory);
-    if (Status != EFI_SUCCESS) {
-
-        SystemTable->ConOut->OutputString(
-            SystemTable->ConOut, L"Une erreur s'est produite, impossible d'allouer de la memoire virtuelle.\r\n");
-        return 0;
-    } else {
-        return Memory;
+        AllocateAddress, Type, Pages, adress);    
+    switch (Status) {
+        case EFI_SUCCESS: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Memoire virtuelle alloue.\r\n"); break;
+        case EFI_OUT_OF_RESOURCES: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Erreur: Out of ressource.\r\n"); break;
+        case EFI_INVALID_PARAMETER: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Erreur: Type is not AllocateAnyPages, AllocateMaxAddress or AllocateAddress.\r\n"); break;
+        case EFI_NOT_FOUND: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Erreur: The requested pages could not be found.\r\n"); break;
+        default: break;
     }
 }
 

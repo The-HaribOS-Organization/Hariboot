@@ -2,15 +2,12 @@
 #include "memory/mem.h"
 
 
-void *memcpy(void *srcPtr, void *destPtr, UINTN size) {
+void *memcpy(void *dest, const void *src, UINTN n) {
+    
+    for (UINTN i = 0; i < n; ++i)
+        ((UINT8 *)dest)[i] = ((UINT8 *)src)[i];
 
-    UINT8 *dest = (UINT8 *)destPtr;
-    UINT8 *src = (UINT8 *)srcPtr;
-    for (UINTN i = 0; i < size; i++) {
-        dest[i] = src[i];
-    }
-
-    return destPtr;
+    return dest;
 }
 
 void *memset(void *buffer, UINT32 value, UINTN size) {
