@@ -9,7 +9,7 @@ utiles pour allouer ou non de la mémoire avec UEFI.
 
 void *allocPool(EFI_SYSTEM_TABLE *SystemTable, EFI_MEMORY_TYPE Type, UINTN Size);
 void freePool(EFI_SYSTEM_TABLE *SystemTable, void *Buffer);
-EFI_PHYSICAL_ADDRESS allocPages(EFI_SYSTEM_TABLE *SystemTable, EFI_MEMORY_TYPE Type, UINTN Pages);
+void allocPages(EFI_SYSTEM_TABLE *SystemTable, EFI_MEMORY_TYPE Type, UINTN Pages, EFI_PHYSICAL_ADDRESS *adress);
 void freePages(EFI_SYSTEM_TABLE *SystemTable, EFI_PHYSICAL_ADDRESS Memory, UINTN Pages);
 EFI_MEMORY_DESCRIPTOR *getMmap(EFI_SYSTEM_TABLE* SystemTable, UINTN DescriptorSize, UINT32 DescriptorVersion);
 

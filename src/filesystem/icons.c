@@ -82,8 +82,8 @@ void showIcon(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, 
             for (UINT32 j = Position.x; j < (Position.x + IconSize.x); j++) {
 
                 pixelValue.blue = bitmapRow[offset++] & 0xFF;
-                pixelValue.green = bitmapRow[offset++] & 0xFF;
                 pixelValue.red = bitmapRow[offset++] & 0xFF;
+                pixelValue.green = bitmapRow[offset++] & 0xFF;
                 pixelValue.alpha = bitmapRow[offset++] & 0xFF;
                 drawPoint_32bpp(Gop, (Vec2){j, i}, ((pixelValue.red << 16) | (pixelValue.green << 8) | pixelValue.blue));
             }

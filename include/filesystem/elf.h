@@ -43,6 +43,13 @@ typedef enum arch_instruction_set {
     RISC_V = 0xF3
 } arch_instruction_set;
 
+typedef enum p_types {
+    PT_NULL = 0x0,
+    PT_LOAD = 0x1,
+    PT_DYNAMIC = 0x2,
+    PT_INTERP = 0x3,
+    PT_NOTE = 0x4
+} p_types_t;
 
 typedef struct Elf_Header {
     UINT8 e_ident[16];
@@ -88,8 +95,8 @@ typedef struct Elf_Program_Header {
 
 UINT8 *readELFFile(EFI_SYSTEM_TABLE *SystemTable, CHAR16 *Filename);
 Elf_Header *parseELFHeader(EFI_SYSTEM_TABLE *SystemTable, UINT8 *elfFile);
-Elf_Program_Header *parseELFProgramHeader(EFI_SYSTEM_TABLE *SystemTable, UINT64 programHeaderTablePosition, UINT8 *elfFile);
-Elf_Section_Header *parseELFSectionHeader(EFI_SYSTEM_TABLE *SystemTable, UINT64 sHTPosition, UINT8 *elfFile);
+Elf_Program_Header *parseELFProgramHeader(EFI_SYSTEM_TABLE *SystemTable, UINT16 pHTPosition, UINT8 *elfFile);
+Elf_Section_Header *parseELFSectionHeader(EFI_SYSTEM_TABLE *SystemTable, UINT16 sHTPosition, UINT8 *elfFile);
 BOOLEAN isELF(Elf_Header *header);
 
 #endif

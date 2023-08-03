@@ -14,7 +14,11 @@
 #include "system/stall.h"
 #include "system/sysservices.h"
 #include "uefi_gui/button.h"
+#include "system/rsdp.h"
 
+
+#define align_up(x, align)   (((x) + (align)-1) & ~((align)-1))
+#define align_down(x, align) ((x) & ~((align)-1))
 
 Button_t *buttons[] = {};
 CHAR8 *strings[] = {
@@ -97,16 +101,19 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
     EFI_PHYSICAL_ADDRESS elfAddress, imageEntry;
 
     Elf_Header *eheader;
+    Elf_Program_Header *pheader;
     UINT8 *elfFile, *configFile;
     config_file_t *configStruct;
+    INTN Version;
 
     Vec3 Colors;
     UINT8 index = 0, indexChecking = 0;
     Button_t *SelectedButton;
     UINT32 offset;
     Vec3 pixelValue;
-    void *Datas;
+    void *Datas, *RSDPointer;
 
+    CHAR16 *buf;
 
     enadisCursor(SystemTable, 0);
     Status = setBackForeColor(SystemTable, VGA_GREEN, VGA_BLACK);
@@ -114,18 +121,40 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 
     Gop = locateGOP(SystemTable);
     setVideoMode(SystemTable, Gop, 0x3d);
-
+    
     initFileSystem(SystemTable, ImageHandle);
     configFile = readConfigFile(SystemTable);
     configStruct = parseConfigFile(SystemTable, configFile);
     elfFile = readELFFile(SystemTable, L"KERNEL\\loader.bin");
     eheader = parseELFHeader(SystemTable, elfFile);
+    pheader = parseELFProgramHeader(SystemTable, eheader->e_phoff, elfFile);
 
-    if (isELF(eheader))
+    if (isELF(eheader)) {
         SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Header ELF confirme.\r\n");
-    else
+    } else {
         SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Header incorrect.\r\n");
-        
+        return -1;
+    }
+
+    /*for (UINTN i = 0; i < (UINT64)eheader->e_phnum * eheader->e_phentsize; i += eheader->e_phentsize) {
+
+        Elf_Program_Header *progHeader = (Elf_Program_Header *)((UINT64)eheader + (eheader->e_phoff + i));
+        if (progHeader->p_paddr) {
+    
+            if (progHeader->p_type == PT_LOAD) {
+
+                itoa(progHeader->p_type, buf, 10);
+                SystemTable->ConOut->OutputString(SystemTable->ConOut, buf);
+                SystemTable->ConOut->OutputString(SystemTable->ConOut, L"\r\n");
+
+                Elf64_Addr segment = progHeader->p_paddr;
+                allocPages(SystemTable, EfiLoaderData, ((progHeader->p_memsz + 4096 - 1) / 4096), &segment);
+            }
+        }
+    }*/
+
+    //sleep(SystemTable, 99999999999999);
+
     resetTerm(SystemTable);
     showIcon(SystemTable, Gop, (Vec2){((Gop->Mode->Info->HorizontalResolution / 2) - (500 / 2)), ((Gop->Mode->Info->VerticalResolution / 2) - (500 / 2))}, (Vec2){500, 500}, L"Boot.bmp");
     sleep(SystemTable, 9999999);
@@ -207,9 +236,9 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
         Shutdown(SystemTable, sizeof(Datas), Datas);   
     }
 
-    //int (*KernelMain)(int) = ((__attribute__((sysv_abi)) int (*)(int))&elfFile[]);
+    /*int (*KernelMain)(int) = ((__attribute__((sysv_abi)) int (*)(int))&elfFile[eheader->e_entry]);
 
-    /*int number = 9;
+    int number = 9;
     int result = KernelMain(number);
     itoa(result, buf, 10);
     SystemTable->ConOut->OutputString(SystemTable->ConOut, buf);

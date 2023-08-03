@@ -401,7 +401,8 @@ void drawLine(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec2 posA, Vec2 posB, Vec3 pixe
 void drawRect(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 posUpperLeft, Vec2 posDownRight, Vec3 pixel, BOOLEAN rectType) {
 
     Vec3 ColorsRead, ColorsWrite;
-    
+    Vec2 Point;
+
     if (rectType == FALSE) {
         UINT32 dx = posDownRight.x - posUpperLeft.x;
         UINT32 dy = posDownRight.y - posUpperLeft.y;
@@ -412,10 +413,12 @@ void drawRect(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 posUpperLeft, Vec2 posDown
         drawLine(gop, (Vec2){posUpperLeft.x + dx, posUpperLeft.y}, (Vec2){posUpperLeft.x + dx, posUpperLeft.y + dy}, pixel); // Right
     // Outlined
     } else {
+
         
         for (UINT32 y = posUpperLeft.y; y < posDownRight.y; ++y) {
             for (UINT32 x = posUpperLeft.x; x < posDownRight.x; ++x) {
-                ColorsRead = getPixelValue(gop, (Vec2){x, y});
+
+				ColorsRead = getPixelValue(gop, (Vec2){x, y});
                 ColorsWrite.red = (ColorsRead.red * pixel.alpha + pixel.red * (255 - pixel.alpha)) / 255;
                 ColorsWrite.green = (ColorsRead.green * pixel.alpha + pixel.green * (255 - pixel.alpha)) / 255;
                 ColorsWrite.blue = (ColorsRead.blue * pixel.alpha + pixel.blue * (255 - pixel.alpha)) / 255;

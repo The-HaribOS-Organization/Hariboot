@@ -14,16 +14,16 @@ UINT8 atoi(const CHAR8 *string) {
 
 
 /* This function was taken from geeks for geeks and modified a little.*/
-UINTN strcmp(CHAR8 *firstString, CHAR8 *secondString) {
+BOOLEAN strcmp(CHAR8 *firstString, CHAR8 *secondString) {
 
-	UINTN result = 0;
-
-	for (UINTN i = 0; firstString[i] != '\n'; i++) {
+	INTN result = 0;
+	for (UINTN i = 0; firstString[i] != '\0'; i++) {
 		if (firstString[i] == secondString[i]) continue;
 		else result++;
 	}
 
-	return result;
+	if (result == 0) return TRUE;
+	else return FALSE;
 }
 
 void itoa(UINT32 number, CHAR16 *buffer, INT32 baseNumber) {
