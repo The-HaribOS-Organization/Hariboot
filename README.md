@@ -1,4 +1,9 @@
-# Hariboot
+<p align="center">
+  <img src="https://github.com/The-HaribOS-Organization/Hariboot/blob/main/logo.png?raw=true" />
+</p>
+<h1 align="center"><strong>Hariboot</strong></h1>
+
+<br>
 The UEFI bootloader for the HaribOS operating system
 
 ## To Install
