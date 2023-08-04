@@ -15,10 +15,11 @@
 #include "system/sysservices.h"
 #include "uefi_gui/button.h"
 #include "system/rsdp.h"
+#include "gdt/gdt.h"
 
 
 #define align_up(x, align)   (((x) + (align)-1) & ~((align)-1))
-#define align_down(x, align) ((x) & ~((align)-1))
+#define align_down(x, align) ((x) & ~((align)-1)) 
 
 Button_t *buttons[] = {};
 CHAR8 *strings[] = {
@@ -28,8 +29,30 @@ CHAR8 *strings[] = {
     "Quitter"
 };
 
+static void showLoadingBar(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop) {
 
-static inline void createsAllButtons(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec3 selectedBackgroundColor, Vec3 textColor, Vec3 colorButton) {
+    UINT16 lenght = 300;
+
+    drawRect(
+        Gop,
+        (Vec2){((Gop->Mode->Info->HorizontalResolution / 2) - 150), (((Gop->Mode->Info->VerticalResolution / 2) + 100) - 3)},
+        (Vec2){((Gop->Mode->Info->HorizontalResolution / 2) + 150), (((Gop->Mode->Info->VerticalResolution / 2) + 100) + 3)},
+        (Vec3){241, 170, 117, 0x80},
+        TRUE);
+
+    for (UINTN i = 0; i < lenght+1; i++) {
+
+        drawRect(
+            Gop,
+            (Vec2){((Gop->Mode->Info->HorizontalResolution / 2) - 150), (((Gop->Mode->Info->VerticalResolution / 2) + 100) - 3)},
+            (Vec2){((Gop->Mode->Info->HorizontalResolution / 2) - 150 + i), (((Gop->Mode->Info->VerticalResolution / 2) + 100) + 3)},
+            (Vec3){255, 108, 0, 0x00},
+            TRUE);
+        sleep(SystemTable, 55555);
+    }
+}
+
+static void createsAllButtons(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec3 selectedBackgroundColor, Vec3 textColor, Vec3 colorButton) {
 
     Button_t *buttonCLIBoot = createButton(
         SystemTable,
@@ -121,22 +144,19 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 
     Gop = locateGOP(SystemTable);
     setVideoMode(SystemTable, Gop, 0x3d);
-    
+
     initFileSystem(SystemTable, ImageHandle);
     configFile = readConfigFile(SystemTable);
     configStruct = parseConfigFile(SystemTable, configFile);
+
     elfFile = readELFFile(SystemTable, L"KERNEL\\loader.bin");
     eheader = parseELFHeader(SystemTable, elfFile);
     pheader = parseELFProgramHeader(SystemTable, eheader->e_phoff, elfFile);
 
-    if (isELF(eheader)) {
-        SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Header ELF confirme.\r\n");
-    } else {
-        SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Header incorrect.\r\n");
-        return -1;
-    }
+    if (isELF(eheader)) SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Header ELF confirme.\r\n");
+    else return -1;
 
-    /*for (UINTN i = 0; i < (UINT64)eheader->e_phnum * eheader->e_phentsize; i += eheader->e_phentsize) {
+    for (UINTN i = 0; i < (UINT64)eheader->e_phnum * eheader->e_phentsize; i += eheader->e_phentsize) {
 
         Elf_Program_Header *progHeader = (Elf_Program_Header *)((UINT64)eheader + (eheader->e_phoff + i));
         if (progHeader->p_paddr) {
@@ -151,13 +171,13 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
                 allocPages(SystemTable, EfiLoaderData, ((progHeader->p_memsz + 4096 - 1) / 4096), &segment);
             }
         }
-    }*/
+    }
 
-    //sleep(SystemTable, 99999999999999);
+    initGDT();
 
     resetTerm(SystemTable);
     showIcon(SystemTable, Gop, (Vec2){((Gop->Mode->Info->HorizontalResolution / 2) - (500 / 2)), ((Gop->Mode->Info->VerticalResolution / 2) - (500 / 2))}, (Vec2){500, 500}, L"Boot.bmp");
-    sleep(SystemTable, 9999999);
+    showLoadingBar(SystemTable, Gop);
 
     resetTerm(SystemTable);
 
