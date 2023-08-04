@@ -4,13 +4,15 @@ OVMF_LOCALIZATION = /usr/share/ovmf
 
 # Compiler
 CXX = clang
+NASM = nasm
+NASMFLAG = -fwin64
 CXXFLAGS = -target x86_64-unknown-windows -ffreestanding -fshort-wchar -mno-red-zone
 INCLUDE_HEADERS = -Iinclude -I$(GNU-EFI_LOCALIZATION)/inc -I$(GNU-EFI_LOCALIZATION)/inc/x86_64 -I$(GNU-EFI_LOCALIZATION)/inc/protocol
 
 # Files
-SRCS := $(wildcard src/*.c) $(wildcard src/**/*.c)
+SRCS := $(wildcard src/*.c) $(wildcard src/**/*.c) $(wildcard src/*.asm) $(wildcard src/**/*.asm)
 OBJ_DIR := obj
-OBJS := $(patsubst src/%.c, $(OBJ_DIR)/%.o, $(SRCS))
+OBJS := $(patsubst src/%.c, $(OBJ_DIR)/%.o, $(patsubst src/%.asm, $(OBJ_DIR)/%.o, $(SRCS)))
 
 # Linker
 LDFLAGS = -target x86_64-unknown-windows -nostdlib -Wl,-entry:efi_main -Wl,-subsystem:efi_application -fuse-ld=lld-link
@@ -21,6 +23,10 @@ hariboot: $(OBJS) build iso
 $(OBJ_DIR)/%.o: src/%.c
 	@ mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) $(INCLUDE_HEADERS) -c $< -o $@
+
+$(OBJ_DIR)/%.o: src/%.asm
+	@ mkdir -p $(@D)
+	$(NASM) $(NASMFLAG) $< -o $@
 
 build:
 	$(CXX) $(LDFLAGS) -o BOOTX64.EFI $(OBJS)
@@ -50,7 +56,7 @@ run-debug:
 
 clean:
 	rm -rf $(OBJ_DIR)
-	rm -f main.efi
+	rm -f BOOTX64.EFI
 	rm -f fat.img
 	rm -rf iso/
 
