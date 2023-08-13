@@ -2,4 +2,4 @@
 /obj/
 /gnu-efi/
 /fat.img
-/main.efi
+/BOOTX64.EFI
