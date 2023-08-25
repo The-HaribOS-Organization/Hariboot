@@ -1,0 +1,29 @@
+name: Build Workflow
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up NASM and Clang
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y nasm clang mtools xorriso lld qemu-system 
+    - name: Build using Make
+      run: |
+        make
+    - name: Move executables to artifacts
+      run: |
+        mkdir -p binaries/
+        mv /home/runner/work/Hariboot/Hariboot/iso/* binaries/
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: binaries
+        path: binaries
