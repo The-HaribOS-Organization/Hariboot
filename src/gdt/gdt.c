@@ -42,7 +42,7 @@ void loadGdt(void)
 {
     return;
 }
-void reloadSegment(void);
+void reloadSegment(void)
 {
     return;
 }
