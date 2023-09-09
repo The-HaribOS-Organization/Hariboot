@@ -20,7 +20,22 @@ typedef struct PSF1_Font {
     UINT8 glyphSize;
 } PSF1_Font_t;
 
+typedef struct PSF2_Font {
+    UINT32 MagicBytes;
+    UINT32 Version;
+    UINT32 HeaderSize;
+    UINT32 Flags;
+    UINT32 Lenght;
+    UINT32 GlypheSize;
+    UINT32 Height;
+    UINT32 Width;
+} PSF2_Font_t;
+
 UINT8 *getPSFFontFile(EFI_SYSTEM_TABLE *SystemTable, CHAR16 *FontName);
-PSF1_Font_t *parseFontFile(EFI_SYSTEM_TABLE *SystemTable, UINT8 *FontArray);
+PSF1_Font_t *parsePSF1Font(EFI_SYSTEM_TABLE *SystemTable, UINT8 *FontArray);
+PSF2_Font_t *parsePSF2Font(EFI_SYSTEM_TABLE *SystemTable, UINT8 *FontArray);
+
+extern CHAR8 _binary_zap_ligh;
+extern CHAR8 _binary_zap_ligh;
 
 #endif

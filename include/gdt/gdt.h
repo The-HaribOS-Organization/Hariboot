@@ -43,7 +43,6 @@ struct Tss_Descriptor {
 //extern void loadGdt(UINT64);
 void initGDT();
 void createDescriptor(UINT8 Number, UINT64 Base, UINT64 Limit, UINT8 Access, UINT8 Gran);
-void loadGdt(void);
-void reloadSegment(void);
-void reloadCS(void);
+//void loadGdt(void);
+
 #endif

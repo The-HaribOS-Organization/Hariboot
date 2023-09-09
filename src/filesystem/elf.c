@@ -21,7 +21,6 @@ UINT8 *readELFFile(EFI_SYSTEM_TABLE *SystemTable, CHAR16 *Filename) {
     ElfArray = (UINT8 *)Result;
 
     resetTerm(SystemTable);
-    
     return ElfArray;
 }
 

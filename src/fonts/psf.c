@@ -5,6 +5,12 @@
 #include "filesystem/files.h"
 
 
+static inline UINT8 psfType(UINT8 *psfArray) {
+
+    if (((psfArray[0] << 8) | psfArray[1]) == 0x3604) return 1;
+    else return 2;
+}
+
 UINT8 *getPSFFontFile(EFI_SYSTEM_TABLE *SystemTable, CHAR16 *FontName) {
 
     void *Buffer;
@@ -20,14 +26,27 @@ UINT8 *getPSFFontFile(EFI_SYSTEM_TABLE *SystemTable, CHAR16 *FontName) {
     return PSFArray;
 }
 
-PSF1_Font_t *parseFontFile(EFI_SYSTEM_TABLE *SystemTable, UINT8 *FontArray) {
+PSF1_Font_t *parsePSF1Font(EFI_SYSTEM_TABLE *SystemTable, UINT8 *FontArray) {
 
-    PSF1_Font_t *PSFStruct;
-    PSFStruct = (PSF1_Font_t *)allocPool(SystemTable, EfiLoaderData, sizeof(PSF1_Font_t));
+    PSF1_Font_t *font = (PSF1_Font_t *)allocPool(SystemTable, EfiLoaderData, sizeof(PSF1_Font_t));
+    SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PSF Font 1.\r\n");
+    *font = *(PSF1_Font_t *)FontArray;
 
-    PSFStruct->headerType = (FontArray[0] << 16) + FontArray[1];
-    PSFStruct->fontMode = FontArray[2];
-    PSFStruct->glyphSize = FontArray[3];
-
-    return PSFStruct;
+    return font;
 }
+
+PSF2_Font_t *parsePSF2Font(EFI_SYSTEM_TABLE *SystemTable, UINT8 *FontArray) {
+
+    PSF2_Font_t *font = (PSF2_Font_t *)allocPool(SystemTable, EfiLoaderData, sizeof(PSF2_Font_t));
+    SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PSF Font 2.\r\n");
+    *font = *(PSF2_Font_t *)FontArray;
+
+    return font;
+}
+
+/*void initPSFFont(EFI_SYSTEM_TABLE *SystemTable) {
+
+    UINT8 *psfArray = getPSFFontFile(SystemTable, "fontFile.psf");
+    UINT16 glyphs = 0;
+    
+}*/

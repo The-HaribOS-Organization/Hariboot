@@ -33,11 +33,3 @@ EFI_STATUS enadisCursor(EFI_SYSTEM_TABLE *SystemTable, BOOLEAN onff) {
     EFI_STATUS status = SystemTable->ConOut->EnableCursor(SystemTable->ConOut, onff);
     return status;
 }
-
-EFI_STATUS setBackForeColor(EFI_SYSTEM_TABLE *SystemTable, UINT8 Fg, UINT8 Bg) {
-
-    EFI_STATUS Status;
-    Status = SystemTable->ConOut->SetAttribute(SystemTable->ConOut, ((Bg << 4) | Fg));
-
-    return Status;
-}

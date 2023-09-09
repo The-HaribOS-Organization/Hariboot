@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="9639ad93-527f-4844-9a8d-986f4dd97da1" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../fonts/zap-vga16.psf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/hariboot-mkconfig.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hariboot-mkconfig.pyproject" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mkconfig.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ressources/icons8-color-swatch-20.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ressources/icons8-dark-vador-50.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ressources/icons8-light-mode-50.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ressources/icons8-mode-veille-50.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui/form.ui" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui/iconsRessources.qrc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui/main.ui" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/../Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../fonts/zap-light16.psf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../include/filesystem/elf.h" beforeDir="false" afterPath="$PROJECT_DIR$/../include/filesystem/elf.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../include/fonts/psf.h" beforeDir="false" afterPath="$PROJECT_DIR$/../include/fonts/psf.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../include/gdt/gdt.h" beforeDir="false" afterPath="$PROJECT_DIR$/../include/gdt/gdt.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../include/io/output.h" beforeDir="false" afterPath="$PROJECT_DIR$/../include/io/output.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/filesystem/elf.c" beforeDir="false" afterPath="$PROJECT_DIR$/../src/filesystem/elf.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/fonts/psf.c" beforeDir="false" afterPath="$PROJECT_DIR$/../src/fonts/psf.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/gdt/gdt.c" beforeDir="false" afterPath="$PROJECT_DIR$/../src/gdt/gdt.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/gdt/load_gdt.asm" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/graphics/drawing.c" beforeDir="false" afterPath="$PROJECT_DIR$/../src/graphics/drawing.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/io/output.c" beforeDir="false" afterPath="$PROJECT_DIR$/../src/io/output.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/memory/mmap.c" beforeDir="false" afterPath="$PROJECT_DIR$/../src/memory/mmap.c" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 6
+}</component>
+  <component name="ProjectId" id="2UiJbU2dl600rlJokO6Asy0IQBl" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/ui" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="hariboot-mkconfig" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="9639ad93-527f-4844-9a8d-986f4dd97da1" name="Changes" comment="" />
+      <created>1693416540036</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1693416540036</updated>
+      <workItem from="1693416543298" duration="3392000" />
+      <workItem from="1693423252827" duration="2940000" />
+      <workItem from="1693484351853" duration="6688000" />
+      <workItem from="1693513670544" duration="614000" />
+      <workItem from="1693585239664" duration="3593000" />
+      <workItem from="1693744995551" duration="6182000" />
+      <workItem from="1694280138863" duration="2216000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/hariboot_mkconfig$main.coverage" NAME="main Coverage Results" MODIFIED="1694293007625" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+  </component>
+</project>

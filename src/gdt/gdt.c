@@ -37,16 +37,3 @@ void initGDT() {
 
     //loadGdt((UINT64)&gdt);
 }
-
-void loadGdt(void)
-{
-    return;
-}
-void reloadSegment(void)
-{
-    return;
-}
-void reloadCS(void)
-{
-    return;
-}

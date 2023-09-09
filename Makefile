@@ -49,7 +49,7 @@ iso:
 	xorriso -as mkisofs -R -f -e fat.img -no-emul-boot -o iso/HaribOS.iso iso
 
 run:
-	qemu-system-x86_64 -drive file=iso/fat.img -m 256 -cpu qemu64 -drive if=pflash,format=raw,unit=0,file="$(OVMF_LOCALIZATION)/OVMF.fd",readonly=on -net none -d int
+	qemu-system-x86_64 -drive file=iso/fat.img -m 2048 -cpu qemu64 -drive if=pflash,format=raw,unit=0,file="$(OVMF_LOCALIZATION)/OVMF.fd",readonly=on -net none -d int
 
 run-debug:
 	qemu-system-x86_64 -drive file=iso/fat.img -m 256M -cpu qemu64 -drive if=pflash,format=raw,unit=0,file="$(OVMF_LOCALIZATION)/OVMF.fd",readonly=on -net none -d int -serial tcp::666,server -s -S

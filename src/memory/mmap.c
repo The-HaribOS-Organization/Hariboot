@@ -36,7 +36,7 @@ void allocPages(EFI_SYSTEM_TABLE *SystemTable, EFI_MEMORY_TYPE Type, UINTN Pages
     EFI_STATUS Status;
 
     Status = SystemTable->BootServices->AllocatePages(
-        AllocateAddress, Type, Pages, adress);    
+        AllocateAnyPages, Type, Pages, adress);
     switch (Status) {
         case EFI_SUCCESS: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Memoire virtuelle alloue.\r\n"); break;
         case EFI_OUT_OF_RESOURCES: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Erreur: Out of ressource.\r\n"); break;

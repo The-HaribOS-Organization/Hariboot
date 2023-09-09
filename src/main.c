@@ -15,11 +15,7 @@
 #include "system/sysservices.h"
 #include "uefi_gui/button.h"
 #include "system/rsdp.h"
-#include "gdt/gdt.h"
 
-
-#define align_up(x, align)   (((x) + (align)-1) & ~((align)-1))
-#define align_down(x, align) ((x) & ~((align)-1)) 
 
 Button_t *buttons[] = {};
 CHAR8 *strings[] = {
@@ -28,6 +24,12 @@ CHAR8 *strings[] = {
     "Ouvrir le terminal UEFI.",
     "Quitter"
 };
+
+
+inline void setBackForeColor(EFI_SYSTEM_TABLE *SystemTable, UINT8 Fg, UINT8 Bg) {
+
+    SystemTable->ConOut->SetAttribute(SystemTable->ConOut, ((Bg << 4) | Fg));
+}
 
 static void showLoadingBar(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop) {
 
@@ -139,7 +141,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
     CHAR16 *buf;
 
     enadisCursor(SystemTable, 0);
-    Status = setBackForeColor(SystemTable, VGA_GREEN, VGA_BLACK);
+    setBackForeColor(SystemTable, VGA_RED, VGA_WHITE);
     resetTerm(SystemTable);
 
     Gop = locateGOP(SystemTable);
@@ -149,31 +151,49 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
     configFile = readConfigFile(SystemTable);
     configStruct = parseConfigFile(SystemTable, configFile);
 
-    elfFile = readELFFile(SystemTable, L"KERNEL\\loader.bin");
+    /*elfFile = readELFFile(SystemTable, L"KERNEL\\loader.bin");
     eheader = parseELFHeader(SystemTable, elfFile);
     pheader = parseELFProgramHeader(SystemTable, eheader->e_phoff, elfFile);
 
     if (isELF(eheader)) SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Header ELF confirme.\r\n");
     else return -1;
 
-    for (UINTN i = 0; i < (UINT64)eheader->e_phnum * eheader->e_phentsize; i += eheader->e_phentsize) {
+    if (eheader->e_ident[EL_CLASS] == 0x1) SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Fichier ELF 32 bits.\r\n");
+    else SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Fichier ELF 64 bits.\r\n");
 
-        Elf_Program_Header *progHeader = (Elf_Program_Header *)((UINT64)eheader + (eheader->e_phoff + i));
-        if (progHeader->p_paddr) {
-    
-            if (progHeader->p_type == PT_LOAD) {
+    if (eheader->e_ident[EL_DATA] == 0x1) SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Fichier ELF essentiellement Little Endian.\r\n");
+    else SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Fichier ELF essentiellement en Big Endian.\r\n");
 
-                itoa(progHeader->p_type, buf, 10);
-                SystemTable->ConOut->OutputString(SystemTable->ConOut, buf);
-                SystemTable->ConOut->OutputString(SystemTable->ConOut, L"\r\n");
+    if (eheader->e_type == 0x1) SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Type de segment: RELOCATABLE.\r\n");
+    else if (eheader->e_type == 0x2) SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Type de segment: EXECUTABLE.\r\n");
+    else if (eheader->e_type == 0x3) SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Type de segment: SHARED.\r\n");
+    else SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Type de segment: CORE.\r\n");
 
-                Elf64_Addr segment = progHeader->p_paddr;
-                allocPages(SystemTable, EfiLoaderData, ((progHeader->p_memsz + 4096 - 1) / 4096), &segment);
-            }
+    for (UINTN i = 0; i < eheader->e_phnum; i++) {
+
+        Elf_Program_Header progHeader;
+        memcpy(&progHeader, (elfFile + eheader->e_phoff + eheader->e_phentsize * i), sizeof(Elf_Program_Header));
+
+        switch (progHeader.p_type) {
+            case PT_NULL: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PT_NULL Segment found.\r\n"); break;
+            case PT_LOAD: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PT_LOAD Segment found.\r\n"); break;
+            case PT_DYNAMIC: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PT_DYNAMIC Segment found.\r\n"); break;
+            case PT_INTERP: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PT_INTERP Segment found.\r\n"); break;
+            case PT_NOTE: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PT_NOTE Segment found.\r\n"); break;
+            case PT_SHLIB: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PT_SHLIB Segment found.\r\n"); break;
+            case PT_PHDR: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PT_PHDR Segment found.\r\n"); break;
+            case PT_LOOS: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PT_LOOS Segment found.\r\n"); break;
+            case PT_HIOS: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PT_HIOS Segment found.\r\n"); break;
+            case PT_LOPROC: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PT_LOPROC Segment found.\r\n"); break;
+            case PT_HIPROC: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PT_HIPROC Segment found.\r\n"); break;
+            default: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"No Segment Found.\r\n"); break;
         }
-    }
 
-    initGDT();
+        if (progHeader.p_type == PT_LOAD) {
+
+            allocPages(SystemTable, EfiLoaderData, (progHeader.p_memsz / 4096), &progHeader.p_vaddr);
+        }
+    }*/
 
     resetTerm(SystemTable);
     showIcon(SystemTable, Gop, (Vec2){((Gop->Mode->Info->HorizontalResolution / 2) - (500 / 2)), ((Gop->Mode->Info->VerticalResolution / 2) - (500 / 2))}, (Vec2){500, 500}, L"Boot.bmp");
@@ -256,13 +276,8 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
         Shutdown(SystemTable, sizeof(Datas), Datas);   
     }
 
-    /*int (*KernelMain)(int) = ((__attribute__((sysv_abi)) int (*)(int))&elfFile[eheader->e_entry]);
+    //int (*KernelMain)(int) = ((__attribute__((sysv_abi)) int (*)(int))&elfFile[eheader->e_entry]);
 
-    int number = 9;
-    int result = KernelMain(number);
-    itoa(result, buf, 10);
-    SystemTable->ConOut->OutputString(SystemTable->ConOut, buf);
-*/
     while ((Status = SystemTable->ConIn->ReadKeyStroke(SystemTable->ConIn, &Key)) == EFI_NOT_READY);
     return EFI_SUCCESS;
 }

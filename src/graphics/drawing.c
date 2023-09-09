@@ -9,7 +9,6 @@
 
 int _fltused = 0;
 
-UINT32 arrayGradient[3] = {};
 
 static UINT8 g_8x16_font[4096] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -300,11 +299,10 @@ void drawPoint_32bpp(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 position, UINT32 co
 
 void fillScreen(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec3 backgroundColor) {
 
-	UINTN i = 0, j = 0;
 	Vec3 Colors;
 
-	for (i = 0; i < Gop->Mode->Info->HorizontalResolution; i++) {
-        for (j = 0; j < Gop->Mode->Info->VerticalResolution; j++) {
+	for (UINTN i = 0; i < Gop->Mode->Info->HorizontalResolution; i++) {
+        for (UINTN j = 0; j < Gop->Mode->Info->VerticalResolution; j++) {
 
 			switch (backgroundColor.red) {
 				case X_HORIZONTAL:
