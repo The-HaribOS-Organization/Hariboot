@@ -31,7 +31,7 @@ inline void setBackForeColor(EFI_SYSTEM_TABLE *SystemTable, UINT8 Fg, UINT8 Bg) 
     SystemTable->ConOut->SetAttribute(SystemTable->ConOut, ((Bg << 4) | Fg));
 }
 
-static void showLoadingBar(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop) {
+static void showLoadingBar(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec3 frontColor, Vec3 backColor) {
 
     UINT16 lenght = 300;
 
@@ -39,7 +39,7 @@ static void showLoadingBar(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PR
         Gop,
         (Vec2){((Gop->Mode->Info->HorizontalResolution / 2) - 150), (((Gop->Mode->Info->VerticalResolution / 2) + 100) - 3)},
         (Vec2){((Gop->Mode->Info->HorizontalResolution / 2) + 150), (((Gop->Mode->Info->VerticalResolution / 2) + 100) + 3)},
-        (Vec3){241, 170, 117, 0x80},
+        frontColor,
         TRUE);
 
     for (UINTN i = 0; i < lenght+1; i++) {
@@ -48,9 +48,9 @@ static void showLoadingBar(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PR
             Gop,
             (Vec2){((Gop->Mode->Info->HorizontalResolution / 2) - 150), (((Gop->Mode->Info->VerticalResolution / 2) + 100) - 3)},
             (Vec2){((Gop->Mode->Info->HorizontalResolution / 2) - 150 + i), (((Gop->Mode->Info->VerticalResolution / 2) + 100) + 3)},
-            (Vec3){255, 108, 0, 0x00},
+            backColor,
             TRUE);
-        sleep(SystemTable, 55555);
+        sleep(SystemTable, 5555);
     }
 }
 
@@ -68,7 +68,7 @@ static void createsAllButtons(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT
     setColorButton(buttonCLIBoot, colorButton, TRUE);
     setSelectedColor(buttonCLIBoot, selectedBackgroundColor);
     setTextButton(buttonCLIBoot, strings[0], textColor, CENTER);
-    pack(Gop, buttonCLIBoot);
+    pack(SystemTable, Gop, buttonCLIBoot);
     buttons[0] = buttonCLIBoot;
 
     Button_t *buttonGUIBoot = createButton(
@@ -83,7 +83,7 @@ static void createsAllButtons(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT
     setColorButton(buttonGUIBoot, colorButton, TRUE);
     setSelectedColor(buttonGUIBoot, selectedBackgroundColor);
     setTextButton(buttonGUIBoot, strings[1], textColor, CENTER);
-    pack(Gop, buttonGUIBoot);
+    pack(SystemTable, Gop, buttonGUIBoot);
     buttons[1] = buttonGUIBoot;
     
     Button_t *buttonSHELLBoot = createButton(
@@ -98,7 +98,7 @@ static void createsAllButtons(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT
     setColorButton(buttonSHELLBoot, colorButton, TRUE);
     setSelectedColor(buttonSHELLBoot, selectedBackgroundColor);
     setTextButton(buttonSHELLBoot, strings[2], textColor, CENTER);
-    pack(Gop, buttonSHELLBoot);
+    pack(SystemTable, Gop, buttonSHELLBoot);
     buttons[2] = buttonSHELLBoot;
     
     Button_t *buttonEXITBoot = createButton(
@@ -113,7 +113,7 @@ static void createsAllButtons(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT
     setColorButton(buttonEXITBoot, (Vec3){233, 81, 40, 0x00}, TRUE);
     setSelectedColor(buttonEXITBoot, selectedBackgroundColor);
     setTextButton(buttonEXITBoot, strings[3], textColor, CENTER);
-    pack(Gop, buttonEXITBoot);
+    pack(SystemTable, Gop, buttonEXITBoot);
     buttons[3] = buttonEXITBoot;
 }
 
@@ -123,37 +123,37 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
     EFI_INPUT_KEY Key;
     EFI_INPUT_KEY KeyButtons;
     EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop;
-    EFI_PHYSICAL_ADDRESS elfAddress, imageEntry;
+    EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *gopMode;
 
     Elf_Header *eheader;
-    Elf_Program_Header *pheader;
     UINT8 *elfFile, *configFile;
     config_file_t *configStruct;
-    INTN Version;
 
-    Vec3 Colors;
     UINT8 index = 0, indexChecking = 0;
     Button_t *SelectedButton;
-    UINT32 offset;
-    Vec3 pixelValue;
-    void *Datas, *RSDPointer;
+    void *Datas = NULL;
 
-    CHAR16 *buf;
 
     enadisCursor(SystemTable, 0);
     setBackForeColor(SystemTable, VGA_RED, VGA_WHITE);
     resetTerm(SystemTable);
 
     Gop = locateGOP(SystemTable);
-    setVideoMode(SystemTable, Gop, 0x3d);
-
+    setVideoMode(Gop, 0x13);
+    
     initFileSystem(SystemTable, ImageHandle);
     configFile = readConfigFile(SystemTable);
     configStruct = parseConfigFile(SystemTable, configFile);
 
-    /*elfFile = readELFFile(SystemTable, L"KERNEL\\loader.bin");
+    for (int i = 0; i < 100; i++) {
+
+        gopMode = getModeInfos(SystemTable, Gop, i);
+        if ((gopMode->HorizontalResolution == configStruct->width) && (gopMode->VerticalResolution == configStruct->height)) setVideoMode(Gop, i);
+    }
+
+    elfFile = readELFFile(SystemTable, L"KERNEL\\loader.bin");
     eheader = parseELFHeader(SystemTable, elfFile);
-    pheader = parseELFProgramHeader(SystemTable, eheader->e_phoff, elfFile);
+    //pheader = parseELFProgramHeader(SystemTable, eheader->e_phoff, elfFile);
 
     if (isELF(eheader)) SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Header ELF confirme.\r\n");
     else return -1;
@@ -191,13 +191,22 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 
         if (progHeader.p_type == PT_LOAD) {
 
-            allocPages(SystemTable, EfiLoaderData, (progHeader.p_memsz / 4096), &progHeader.p_vaddr);
+            EFI_PHYSICAL_ADDRESS *p_vaddr = (EFI_PHYSICAL_ADDRESS *)allocPool(SystemTable, EfiLoaderData, sizeof(EFI_PHYSICAL_ADDRESS));
+            p_vaddr = (EFI_PHYSICAL_ADDRESS *)progHeader.p_vaddr;
+            allocPages(SystemTable, EfiLoaderData, (progHeader.p_memsz / 4096), p_vaddr);
         }
-    }*/
+    }
 
     resetTerm(SystemTable);
-    showIcon(SystemTable, Gop, (Vec2){((Gop->Mode->Info->HorizontalResolution / 2) - (500 / 2)), ((Gop->Mode->Info->VerticalResolution / 2) - (500 / 2))}, (Vec2){500, 500}, L"Boot.bmp");
-    showLoadingBar(SystemTable, Gop);
+    
+    if (configStruct->hasLoadingBar == 0x1 && configStruct->whatLogo == 0x1) {
+
+        showIcon(SystemTable, Gop, (Vec2){((Gop->Mode->Info->HorizontalResolution / 2) - (500 / 2)), ((Gop->Mode->Info->VerticalResolution / 2) - (500 / 2))}, (Vec2){500, 500}, L"Boot.bmp");
+        showLoadingBar(SystemTable, Gop, configStruct->loadingBarFrontColor, configStruct->loadingBarBackColor);
+    } else if (configStruct->hasLoadingBar == 0x0 && configStruct->whatLogo == 0x1) {
+        showIcon(SystemTable, Gop, (Vec2){((Gop->Mode->Info->HorizontalResolution / 2) - (500 / 2)), ((Gop->Mode->Info->VerticalResolution / 2) - (500 / 2))}, (Vec2){500, 500}, L"Boot.bmp");
+        sleep(SystemTable, 9999999);
+    } else {}
 
     resetTerm(SystemTable);
 
@@ -205,37 +214,46 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 
         if (configStruct->mode[0] == 0x4C && configStruct->mode[1] == 0x49 && configStruct->mode[2] == 0x47 && configStruct->mode[3] == 0x48 && configStruct->mode[4] == 0x54 && configStruct->mode[5] == 0x20) {
 
-            fillScreenDarkAndLightMode(Gop);
-            drawRect(
+            fillScreenDarkAndLightMode(SystemTable, Gop, 0x1);
+            drawRountedMenu(
+                SystemTable,
                 Gop,
                 (Vec2){(Gop->Mode->Info->HorizontalResolution / 2) - 400, (Gop->Mode->Info->VerticalResolution / 2) - 200}, (Vec2){(Gop->Mode->Info->HorizontalResolution / 2) + 400,
-                (Gop->Mode->Info->VerticalResolution / 2) + 200}, (Vec3){0xFF, 0xFF, 0xFF, 0x60},
-                TRUE
+                (Gop->Mode->Info->VerticalResolution / 2) + 200},
+                (Vec3){0xFF, 0xFF, 0xFF, 0x60},
+                50
             );
 
             createsAllButtons(SystemTable, Gop, (Vec3){184, 162, 247, 0xDD}, (Vec3){0x00, 0x00, 0x00, 0x00}, (Vec3){255, 255, 255, 0x00});
+            freePool(SystemTable, configStruct);
         } else if (configStruct->mode[0] == 0x44 && configStruct->mode[1] == 0x41 && configStruct->mode[2] == 0x52 && configStruct->mode[3] == 0x4B && configStruct->mode[4] == 0x20 && configStruct->mode[5] == 0x20) {
 
-            fillScreenDarkAndLightMode(Gop);
-            drawRect(
+            fillScreenDarkAndLightMode(SystemTable, Gop, 0x0);
+            drawRountedMenu(
+                SystemTable,
                 Gop,
                 (Vec2){(Gop->Mode->Info->HorizontalResolution / 2) - 400, (Gop->Mode->Info->VerticalResolution / 2) - 200}, (Vec2){(Gop->Mode->Info->HorizontalResolution / 2) + 400,
-                (Gop->Mode->Info->VerticalResolution / 2) + 200}, (Vec3){0x20, 0x20, 0x20, 0x60},
-                TRUE
+                (Gop->Mode->Info->VerticalResolution / 2) + 200},
+                (Vec3){0x20, 0x20, 0x20, 0x60},
+                50
             );
 
             createsAllButtons(SystemTable, Gop, (Vec3){184, 162, 247, 0xDD}, (Vec3){0xFF, 0xFF, 0xFF, 0x00}, (Vec3){0x0, 0x0, 0x0, 0x00});
+            freePool(SystemTable, configStruct);
         } else {
 
             fillScreen(Gop, configStruct->background_color);
-            drawRect(
+            drawRountedMenu(
+                SystemTable,
                 Gop,
                 (Vec2){(Gop->Mode->Info->HorizontalResolution / 2) - 400, (Gop->Mode->Info->VerticalResolution / 2) - 200}, (Vec2){(Gop->Mode->Info->HorizontalResolution / 2) + 400,
-                (Gop->Mode->Info->VerticalResolution / 2) + 200}, configStruct->background_menu,
-                TRUE
+                (Gop->Mode->Info->VerticalResolution / 2) + 200},
+                configStruct->background_menu,
+                50
             );
 
             createsAllButtons(SystemTable, Gop, configStruct->selected_color_button, configStruct->text_color, configStruct->color_button);
+            freePool(SystemTable, configStruct);
         }
     } else {
 
@@ -250,13 +268,13 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
             indexChecking = index++ % 4;
             SelectedButton = buttons[indexChecking];
             setColorButton(SelectedButton, SelectedButton->SelectedColor, TRUE);
-            pack(Gop, SelectedButton);
+            pack(SystemTable, Gop, SelectedButton);
         } else if (KeyButtons.UnicodeChar == 'u') {
 
             indexChecking = index-- % 4;
             SelectedButton = buttons[indexChecking];
             setColorButton(SelectedButton, SelectedButton->SelectedColor, TRUE);
-            pack(Gop, SelectedButton);
+            pack(SystemTable, Gop, SelectedButton);
         }
 
     } while (KeyButtons.UnicodeChar != 'e');

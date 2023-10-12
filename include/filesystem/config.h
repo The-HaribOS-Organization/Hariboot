@@ -16,14 +16,23 @@ typedef enum type_gradient {
     Y_VERTICAL = 0x4
 } type_gradient_t;
 
+typedef enum type_background {
+    NO_GRADIENT = 0x1,
+    JUST_BITMAP = 0x2
+} type_background_t;
+
+typedef enum screenLoading {
+    mainLogo = 0x1,
+    customLogo = 0x2,
+    loadingBar = 0x9,
+    noLoadingBar = 0x8,
+} screenLoading_t;
+
 typedef struct config_file {
-    UINT8 e_magic[8];
-    UINT8 mode[6];
-    Vec3 background_color;
-    Vec3 background_menu;
-    Vec3 color_button;
-    Vec3 text_color;
-    Vec3 selected_color_button;
+    UINT8 e_magic[8], mode[6];
+    UINT8 hasLoadingBar, whatLogo, hasBackground;
+    UINT16 width, height;
+    Vec3 background_color, background_menu, color_button, text_color, selected_color_button, loadingBarFrontColor, loadingBarBackColor;
 } config_file_t;
 
 UINT8 *readConfigFile(EFI_SYSTEM_TABLE *SystemTable);

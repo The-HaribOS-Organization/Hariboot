@@ -31,7 +31,7 @@ typedef struct Button {
 } Button_t;
 
 Button_t *createButton(EFI_SYSTEM_TABLE *SystemTable, Vec2 Size, Vec2 position);
-void pack(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Button_t *button);
+void pack(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Button_t *button);
 
 inline void setColorButton(Button_t *button, Vec3 Color, BOOLEAN Filled) {
 

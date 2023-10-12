@@ -10,7 +10,7 @@ void ResetSystemCold(EFI_SYSTEM_TABLE *SystemTable, EFI_STATUS Status, UINTN Dat
     );
 }
 
-void ResetSystemWarm(EFI_SYSTEM_TABLE *SystemTable, EFI_STATUS Status, UINTN DataSize, void *Datas) {
+void ResetSystemWarm(EFI_SYSTEM_TABLE *SystemTable, UINTN DataSize, void *Datas) {
 
     SystemTable->RuntimeServices->ResetSystem(
         EfiResetWarm, EFI_SUCCESS, DataSize, Datas

@@ -16,10 +16,10 @@ Button_t *createButton(EFI_SYSTEM_TABLE *SystemTable, Vec2 Size, Vec2 Position) 
     return button;
 }
 
-void pack(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Button_t *button) {
+void pack(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Button_t *button) {
 
     UINTN StringLen = strlen(button->TextButton);
-    drawRect(Gop, button->Position, (Vec2){(button->Position.x + button->Size.x), (button->Position.y + button->Size.y)}, button->ColorButton, button->Filled);
+    drawRountedMenu(SystemTable, Gop, (Vec2){button->Position.x, button->Position.y}, (Vec2){(button->Position.x + button->Size.x), (button->Position.y + button->Size.y)}, button->ColorButton, 15);
     
     if (button->TextAlignment == RIGHT) {
         Vec2 Position = {(button->Position.x + 0x08), (button->Position.y + 16)};

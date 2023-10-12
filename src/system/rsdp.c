@@ -27,8 +27,7 @@ void *getRSDPointer(EFI_SYSTEM_TABLE *SystemTable) {
 
     void *RSDP;
     INTN Version;
-    UINT32 *guidACPI1, *guidACPI2;
-    
+
     EFI_CONFIGURATION_TABLE *table = SystemTable->ConfigurationTable;
 
     for (UINTN i = 0; i < SystemTable->NumberOfTableEntries; i++) {
@@ -38,6 +37,13 @@ void *getRSDPointer(EFI_SYSTEM_TABLE *SystemTable) {
             Version = ACPI_VERSION_0x2;
             if (strcmp("RSD PTR ", (CHAR8 *)table->VendorTable) == TRUE) {
                 SystemTable->ConOut->OutputString(SystemTable->ConOut, L"ACPI Version 2\r\n");
+                RSDP = (void *)table->VendorTable;
+            }
+        } else if (Compare(&table[i].VendorGuid, &EFI_ACPI_10_TABLE_GUID) == 0) {
+
+            Version = ACPI_VERSION_0x1;
+            if (strcmp("RSD PTR ", (CHAR8 *)table->VendorTable) == TRUE) {
+                SystemTable->ConOut->OutputString(SystemTable->ConOut, L"ACPI Version 1\r\n");
                 RSDP = (void *)table->VendorTable;
             }
         }

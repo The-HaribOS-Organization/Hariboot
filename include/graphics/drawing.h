@@ -34,8 +34,9 @@ EFI_PHYSICAL_ADDRESS *allocBuffer(EFI_SYSTEM_TABLE *SystemTable, Vec2 ScreenSize
 void drawPoint_32bpp(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 position, UINT32 color);
 void drawLine(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec2 posA, Vec2 posB, Vec3 pixel);
 void fillScreen(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec3 backgroundColor);
-void fillScreenDarkAndLightMode(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop);
+void fillScreenDarkAndLightMode(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, UINT8 mode);
 void drawRect(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 posUpperLeft, Vec2 posDownRight, Vec3 pixel, BOOLEAN rectType);
+void drawRountedMenu(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 posUpperLeft, Vec2 posDownRight, Vec3 pixel, UINT32 radius);
 Vec3 getPixelValue(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec2 position);
 void drawChar(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, CHAR8 character, Vec2 position, UINT32 color);
 void drawString(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, CHAR8 *string, Vec2 position, Vec3 color);

@@ -476,7 +476,7 @@ QScrollBar::add-line:vertical {
              <property name="geometry">
               <rect>
                <x>0</x>
-               <y>-364</y>
+               <y>-184</y>
                <width>1000</width>
                <height>924</height>
               </rect>
@@ -1426,7 +1426,7 @@ QPushButton::selected {
                                        </widget>
                                       </item>
                                       <item>
-                                       <widget class="QPushButton" name="openColorChooser">
+                                       <widget class="QPushButton" name="openColorChooserBackground">
                                         <property name="minimumSize">
                                          <size>
                                           <width>0</width>
@@ -1891,7 +1891,7 @@ QPushButton::selected {
                                  </widget>
                                 </item>
                                 <item>
-                                 <widget class="QPushButton" name="yellowButton_3BootSelected">
+                                 <widget class="QPushButton" name="yellowButtonBootSelected">
                                   <property name="maximumSize">
                                    <size>
                                     <width>15</width>

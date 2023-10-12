@@ -10,39 +10,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9639ad93-527f-4844-9a8d-986f4dd97da1" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../fonts/zap-vga16.psf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/hariboot-mkconfig.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/hariboot-mkconfig.pyproject" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mkconfig.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ressources/icons8-color-swatch-20.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ressources/icons8-dark-vador-50.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ressources/icons8-light-mode-50.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ressources/icons8-mode-veille-50.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ui/form.ui" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ui/iconsRessources.qrc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ui/main.ui" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/../Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fonts/zap-light16.psf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../include/filesystem/elf.h" beforeDir="false" afterPath="$PROJECT_DIR$/../include/filesystem/elf.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../include/fonts/psf.h" beforeDir="false" afterPath="$PROJECT_DIR$/../include/fonts/psf.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../include/gdt/gdt.h" beforeDir="false" afterPath="$PROJECT_DIR$/../include/gdt/gdt.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../include/io/output.h" beforeDir="false" afterPath="$PROJECT_DIR$/../include/io/output.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/filesystem/elf.c" beforeDir="false" afterPath="$PROJECT_DIR$/../src/filesystem/elf.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/fonts/psf.c" beforeDir="false" afterPath="$PROJECT_DIR$/../src/fonts/psf.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/gdt/gdt.c" beforeDir="false" afterPath="$PROJECT_DIR$/../src/gdt/gdt.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../config/config.hariboot" beforeDir="false" afterPath="$PROJECT_DIR$/../config/config.hariboot" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config.hariboot" beforeDir="false" afterPath="$PROJECT_DIR$/config.hariboot" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mkconfig.py" beforeDir="false" afterPath="$PROJECT_DIR$/mkconfig.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ui/form.ui" beforeDir="false" afterPath="$PROJECT_DIR$/ui/form.ui" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../include/filesystem/config.h" beforeDir="false" afterPath="$PROJECT_DIR$/../include/filesystem/config.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../include/graphics/drawing.h" beforeDir="false" afterPath="$PROJECT_DIR$/../include/graphics/drawing.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../include/maths/maths.h" beforeDir="false" afterPath="$PROJECT_DIR$/../include/maths/maths.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/filesystem/icons.c" beforeDir="false" afterPath="$PROJECT_DIR$/../src/filesystem/icons.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../src/gdt/load_gdt.asm" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../src/graphics/drawing.c" beforeDir="false" afterPath="$PROJECT_DIR$/../src/graphics/drawing.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/io/output.c" beforeDir="false" afterPath="$PROJECT_DIR$/../src/io/output.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../src/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/memory/mmap.c" beforeDir="false" afterPath="$PROJECT_DIR$/../src/memory/mmap.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/maths/power.c" beforeDir="false" afterPath="$PROJECT_DIR$/../src/maths/power.c" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -131,7 +112,11 @@
       <workItem from="1693513670544" duration="614000" />
       <workItem from="1693585239664" duration="3593000" />
       <workItem from="1693744995551" duration="6182000" />
-      <workItem from="1694280138863" duration="2216000" />
+      <workItem from="1694280138863" duration="2815000" />
+      <workItem from="1694526112304" duration="104000" />
+      <workItem from="1694792012375" duration="2313000" />
+      <workItem from="1694890765006" duration="1710000" />
+      <workItem from="1695102406693" duration="1485000" />
     </task>
     <servers />
   </component>
@@ -139,6 +124,6 @@
     <option name="version" value="3" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/hariboot_mkconfig$main.coverage" NAME="main Coverage Results" MODIFIED="1694293007625" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/hariboot_mkconfig$main.coverage" NAME="main Coverage Results" MODIFIED="1695117130812" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

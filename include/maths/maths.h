@@ -4,6 +4,9 @@
 #ifndef _MATHS_
 #define _MATHS_
 
-#define PI 3.14
+#include <maths/power.h>
+#include <maths/trigonometry.h>
+
+#define PI 3.14159265358979323846
 
 #endif

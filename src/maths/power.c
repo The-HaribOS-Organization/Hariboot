@@ -5,7 +5,7 @@
 
 UINT64 pow(UINT64 Number, UINT64 power) {
 
-    UINT64 number = 0;
+    UINT64 number = 1;
     for (UINT64 i = 0; i < power; i++) number *= Number;
     return number;
 }
@@ -23,4 +23,7 @@ float exp(UINT64 Number) {
     return (1 + (pow(Number, 2) / factorial(2)) + (pow(Number, 3) / factorial(3)) + (pow(Number, 4) / factorial(4)) + (pow(Number, 5) / factorial(5)) + (pow(Number, 6) / factorial(6)) + (pow(Number, 7) / factorial(7)));
 }
 
-float sqrt(UINT64 Number) { return Number; }
+float sqrt(UINT64 Number) {
+
+    return (1 + (1/2 * Number) - (1/8 * pow(Number, 2)) + (1/16) * pow(Number, 3));
+}

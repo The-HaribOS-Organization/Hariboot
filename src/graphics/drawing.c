@@ -362,19 +362,37 @@ void fillScreen(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec3 backgroundColor) {
     }
 }
 
-void fillScreenDarkAndLightMode(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop) {
+void fillScreenDarkAndLightMode(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, UINT8 mode) {
 
     Vec3 Colors;
-    for (UINT32 i = 0; i < Gop->Mode->Info->HorizontalResolution; i++) {
-        for (UINT32 j = 0; j < Gop->Mode->Info->VerticalResolution; j++) { 
 
-            Colors.red = (UINT32)(MIN((i / (Gop->Mode->Info->HorizontalResolution / 256)), 255));
-            Colors.green = 0x77;//(UINT32)(MIN((j / (Gop->Mode->Info->VerticalResolution / 256)), 0));
-            Colors.blue = (UINT32)(MIN((j / (Gop->Mode->Info->VerticalResolution / 256)), 255));
+	if (mode == 0x1) {
 
-            drawPoint_32bpp(Gop, (Vec2){i, j}, ((Colors.red << 16) | (Colors.green << 8) | Colors.blue));
-        }
-    }
+		for (UINT32 i = 0; i < Gop->Mode->Info->HorizontalResolution; i++) {
+        	for (UINT32 j = 0; j < Gop->Mode->Info->VerticalResolution; j++) { 
+
+    	        Colors.red = (UINT32)(MIN((i / (Gop->Mode->Info->HorizontalResolution / 256)), 255));
+	            Colors.green = 0x80;//(UINT32)(MIN((j / (Gop->Mode->Info->VerticalResolution / 256)), 0));
+            	Colors.blue = (UINT32)(MIN((j / (Gop->Mode->Info->VerticalResolution / 256)), 255));
+
+            	drawPoint_32bpp(Gop, (Vec2){i, j}, ((Colors.red << 16) | (Colors.green << 8) | Colors.blue));
+        	}
+    	}
+	} else if (mode == 0x0) {
+
+		for (UINT32 i = 0; i < Gop->Mode->Info->HorizontalResolution; i++) {
+        	for (UINT32 j = 0; j < Gop->Mode->Info->VerticalResolution; j++) { 
+
+        	    Colors.red = (UINT32)(MIN((i / (Gop->Mode->Info->HorizontalResolution / 256)), 255));
+    	        Colors.green = 0x40;//(UINT32)(MIN((j / (Gop->Mode->Info->VerticalResolution / 256)), 0));
+	            Colors.blue = (UINT32)(MIN((j / (Gop->Mode->Info->VerticalResolution / 256)), 255));
+
+            	drawPoint_32bpp(Gop, (Vec2){i, j}, ((Colors.red << 16) | (Colors.green << 8) | Colors.blue));
+        	}
+    	}
+	} else {
+		SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Uncompatible mode.\n");
+	}
 }
 
 void drawLine(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec2 posA, Vec2 posB, Vec3 pixel) {
@@ -400,7 +418,6 @@ void drawLine(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec2 posA, Vec2 posB, Vec3 pixe
 void drawRect(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 posUpperLeft, Vec2 posDownRight, Vec3 pixel, BOOLEAN rectType) {
 
     Vec3 ColorsRead, ColorsWrite;
-    Vec2 Point;
 
     if (rectType == FALSE) {
         UINT32 dx = posDownRight.x - posUpperLeft.x;
@@ -426,6 +443,161 @@ void drawRect(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 posUpperLeft, Vec2 posDown
         }
     }
     // filled
+}
+
+void drawRountedMenu(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 posUpperLeft, Vec2 posDownRight, Vec3 pixel, UINT32 radius) {
+
+    Vec2 pointReference, firstPoint, secondPoint, pointToDraw;
+	Vec3 ColorsRead, ColorsWrite;
+	Vec3 *ColorsArray = (Vec3 *)allocPool(SystemTable, EfiLoaderData, sizeof(Vec3) * radius * 1001);
+
+	posUpperLeft.x += radius;
+	posDownRight.x -= radius;
+
+	drawRect(
+		gop,
+		(Vec2){posUpperLeft.x, posUpperLeft.y}, (Vec2){posDownRight.x, posDownRight.y},
+		pixel,
+		TRUE);
+
+	pointReference = (Vec2){posUpperLeft.x, posUpperLeft.y};
+	secondPoint = (Vec2){posUpperLeft.x - radius, posUpperLeft.y};
+	firstPoint = (Vec2){posUpperLeft.x - radius, posUpperLeft.y + radius - 1};
+
+	for (UINT32 i = 0; i < radius; i++) {
+		for (float t = 0; t < 1.001; t+=0.001) {
+
+    	    pointToDraw = (Vec2){((1 - t) * (1 - t) * pointReference.x + 2 * (1 - t) * (secondPoint.x - i) * t + t * t * (firstPoint.x + i)),
+			((1 - t) * (1 - t) * (pointReference.y  + i) + 2 * (1 - t) * (secondPoint.y + i) * t + t * t * firstPoint.y)};
+
+			ColorsRead = getPixelValue(gop, pointToDraw);
+			ColorsArray[i].red = ColorsRead.red;
+			ColorsArray[i].green = ColorsRead.green;
+			ColorsArray[i].blue = ColorsRead.blue;
+        }
+    }
+
+    for (UINT32 i = 0; i < radius; i++) {
+		for (float t = 0; t < 1.001; t+=0.001) {
+
+    	    pointToDraw = (Vec2){((1 - t) * (1 - t) * pointReference.x + 2 * (1 - t) * (secondPoint.x - i) * t + t * t * (firstPoint.x + i)),
+			((1 - t) * (1 - t) * (pointReference.y  + i) + 2 * (1 - t) * (secondPoint.y + i) * t + t * t * firstPoint.y)};
+
+			ColorsWrite.red = (ColorsArray[i].red * pixel.alpha + pixel.red * (255 - pixel.alpha)) / 255;
+            ColorsWrite.green = (ColorsArray[i].green * pixel.alpha + pixel.green * (255 - pixel.alpha)) / 255;
+            ColorsWrite.blue = (ColorsArray[i].blue * pixel.alpha + pixel.blue * (255 - pixel.alpha)) / 255;
+			drawPoint_32bpp(gop, pointToDraw, ((ColorsWrite.red << 16) | (ColorsWrite.green << 8) | ColorsWrite.blue));
+
+        }
+    }
+
+	firstPoint = (Vec2){posUpperLeft.x - radius, posDownRight.y - radius + 1};
+	secondPoint = (Vec2){posUpperLeft.x - radius, posDownRight.y};
+	pointReference = (Vec2){posUpperLeft.x, posDownRight.y};
+
+	for (UINT32 i = 0; i < radius; i++) {
+		for (float t = 0; t < 1.001; t+=0.001) {
+
+    	    pointToDraw = (Vec2){((1 - t) * (1 - t) * pointReference.x + 2 * (1 - t) * (secondPoint.x + i) * t + t * t * (firstPoint.x + i)),
+			((1 - t) * (1 - t) * (pointReference.y - i) + 2 * (1 - t) * (secondPoint.y - i) * t + t * t * firstPoint.y)};
+
+			ColorsRead = getPixelValue(gop, pointToDraw);
+			ColorsArray[i].red = ColorsRead.red;
+			ColorsArray[i].green = ColorsRead.green;
+			ColorsArray[i].blue = ColorsRead.blue;
+        }
+    }
+
+	for (UINT32 i = 0; i < radius; i++) {
+		for (float t = 0; t < 1.001; t+=0.001) {
+
+    	    pointToDraw = (Vec2){((1 - t) * (1 - t) * pointReference.x + 2 * (1 - t) * (secondPoint.x + i) * t + t * t * (firstPoint.x + i)),
+			((1 - t) * (1 - t) * (pointReference.y - i) + 2 * (1 - t) * (secondPoint.y - i) * t + t * t * firstPoint.y)};
+
+			ColorsWrite.red = (ColorsArray[i].red * pixel.alpha + pixel.red * (255 - pixel.alpha)) / 255;
+            ColorsWrite.green = (ColorsArray[i].green * pixel.alpha + pixel.green * (255 - pixel.alpha)) / 255;
+            ColorsWrite.blue = (ColorsArray[i].blue * pixel.alpha + pixel.blue * (255 - pixel.alpha)) / 255;
+			drawPoint_32bpp(gop, pointToDraw, ((ColorsWrite.red << 16) | (ColorsWrite.green << 8) | ColorsWrite.blue));
+        }
+    }
+
+	drawRect(
+		gop,
+		(Vec2){posUpperLeft.x - radius, posUpperLeft.y + radius}, (Vec2){posUpperLeft.x, posDownRight.y - radius},
+		pixel,
+		TRUE);
+
+    pointReference = (Vec2){posDownRight.x, posUpperLeft.y};
+    firstPoint = (Vec2){posDownRight.x + radius, posUpperLeft.y + radius - 0.5};
+    secondPoint = (Vec2){posDownRight.x + radius, posUpperLeft.y};
+
+    for (UINT32 i = 0; i < radius; i++) {
+
+        for (float t = 0; t < 1.001; t+=0.001) {
+
+            pointToDraw = (Vec2){((1 - t) * (1 - t) * pointReference.x + 2 * (1 - t) * (secondPoint.x - i) * t + t * t * (firstPoint.x - i)),
+			((1 - t) * (1 - t) * (pointReference.y + i) + 2 * (1 - t) * (secondPoint.y + i) * t + t * t * firstPoint.y)};
+            
+			ColorsRead = getPixelValue(gop, pointToDraw);
+			ColorsArray[i].red = ColorsRead.red;
+			ColorsArray[i].green = ColorsRead.green;
+			ColorsArray[i].blue = ColorsRead.blue;
+        }
+    }
+
+	for (UINT32 i = 0; i < radius; i++) {
+
+        for (float t = 0; t < 1.001; t+=0.001) {
+
+            pointToDraw = (Vec2){((1 - t) * (1 - t) * pointReference.x + 2 * (1 - t) * (secondPoint.x - i) * t + t * t * (firstPoint.x - i)),
+			((1 - t) * (1 - t) * (pointReference.y + i) + 2 * (1 - t) * (secondPoint.y + i) * t + t * t * firstPoint.y)};
+
+			ColorsWrite.red = (ColorsArray[i].red * pixel.alpha + pixel.red * (255 - pixel.alpha)) / 255;
+            ColorsWrite.green = (ColorsArray[i].green * pixel.alpha + pixel.green * (255 - pixel.alpha)) / 255;
+            ColorsWrite.blue = (ColorsArray[i].blue * pixel.alpha + pixel.blue * (255 - pixel.alpha)) / 255;
+			drawPoint_32bpp(gop, pointToDraw, ((ColorsWrite.red << 16) | (ColorsWrite.green << 8) | ColorsWrite.blue));
+        }
+    }
+
+    pointReference = (Vec2){posDownRight.x, posDownRight.y};
+	secondPoint = (Vec2){posDownRight.x + radius, posDownRight.y};
+	firstPoint = (Vec2){posDownRight.x + radius, posDownRight.y - radius + 1};
+
+	for (UINT32 i = 0; i < radius; i++) {
+
+        for (float t = 0; t < 1.001; t+=0.001) {
+
+            pointToDraw = (Vec2){((1 - t) * (1 - t) * pointReference.x + 2 * (1 - t) * (secondPoint.x - i) * t + t * t * (firstPoint.x - i)),
+			((1 - t) * (1 - t) * (pointReference.y - i) + 2 * (1 - t) * (secondPoint.y - i) * t + t * t * firstPoint.y)};
+
+			ColorsRead = getPixelValue(gop, pointToDraw);
+			ColorsArray[i].red = ColorsRead.red;
+			ColorsArray[i].green = ColorsRead.green;
+			ColorsArray[i].blue = ColorsRead.blue;
+        }
+    }
+
+    for (UINT32 i = 0; i < radius; i++) {
+
+        for (float t = 0; t < 1.001; t+=0.001) {
+
+            pointToDraw = (Vec2){((1 - t) * (1 - t) * pointReference.x + 2 * (1 - t) * (secondPoint.x - i) * t + t * t * (firstPoint.x - i)),
+			((1 - t) * (1 - t) * (pointReference.y - i) + 2 * (1 - t) * (secondPoint.y - i) * t + t * t * firstPoint.y)};
+            
+			ColorsWrite.red = (ColorsArray[i].red * pixel.alpha + pixel.red * (255 - pixel.alpha)) / 255;
+            ColorsWrite.green = (ColorsArray[i].green * pixel.alpha + pixel.green * (255 - pixel.alpha)) / 255;
+            ColorsWrite.blue = (ColorsArray[i].blue * pixel.alpha + pixel.blue * (255 - pixel.alpha)) / 255;
+			drawPoint_32bpp(gop, pointToDraw, ((ColorsWrite.red << 16) | (ColorsWrite.green << 8) | ColorsWrite.blue));
+        }
+    }
+
+	drawRect(
+		gop,
+		(Vec2){posDownRight.x, posUpperLeft.y + radius}, (Vec2){posDownRight.x + radius, posDownRight.y - radius},
+		pixel,
+		TRUE);
+
+	freePool(SystemTable, ColorsArray);
 }
 
 void drawString(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, CHAR8 *string, Vec2 position, Vec3 color) {

@@ -75,9 +75,9 @@ void showIcon(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, 
 
     if (isBitmap(bheader)) {
 
-        for (UINT32 i = (Position.y + (IconSize.y -1)); i > Position.y; i--) {
+        for (UINT32 i = (Position.y + (IconSize.y - 1)); i > Position.y; i--) {
 
-            UINT8 *bitmapRow = (headerArray + headerArray[10]) + (i - Position.y) * IconSize.x * 4;//headerArray[0x1E];
+            UINT8 *bitmapRow = (headerArray + headerArray[10]) + (i - Position.y) * IconSize.x * 4;
             UINT32 offset = 0;
             for (UINT32 j = Position.x; j < (Position.x + IconSize.x); j++) {
 
@@ -85,6 +85,7 @@ void showIcon(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, 
                 pixelValue.green = bitmapRow[offset++] & 0xFF;
                 pixelValue.red = bitmapRow[offset++] & 0xFF;
                 pixelValue.alpha = bitmapRow[offset++] & 0xFF;
+                
                 drawPoint_32bpp(Gop, (Vec2){j, i}, ((pixelValue.red << 16) | (pixelValue.green << 8) | pixelValue.blue));
             }
         }
