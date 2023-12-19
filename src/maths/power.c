@@ -12,10 +12,8 @@ UINT64 pow(UINT64 Number, UINT64 power) {
 
 UINT64 factorial(UINT64 Number) {
 
-    UINT64 result = 1;
-    for (UINT64 i = 1; i < Number+1; i++) result *= i;
-
-    return result;
+    if (Number == 0) return 1;
+    return Number * factorial(Number-1);
 }
 
 float exp(UINT64 Number) {
@@ -26,4 +24,9 @@ float exp(UINT64 Number) {
 float sqrt(UINT64 Number) {
 
     return (1 + (1/2 * Number) - (1/8 * pow(Number, 2)) + (1/16) * pow(Number, 3));
+}
+
+double sqrt(double Number) {
+
+    return (1.0 + (1.0 / 2 * Number) - (1.0 / 8 * pow(Number, 2)) + (1.0 / 16) * pow(Number, 3));
 }
