@@ -277,6 +277,18 @@ EFI_PHYSICAL_ADDRESS *allocBuffer(EFI_SYSTEM_TABLE *SystemTable, Vec2 ScreenSize
 	return Buffer;
 }
 
+static inline void bresenhamAlgorithm(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec2 position, Vec3 color, UINT16 x, UINT16 y) {
+
+	drawPoint_32bpp(Gop, (Vec2){position.x+x, position.y+y}, (color.red << 16 | color.green << 8 | color.blue));
+    drawPoint_32bpp(Gop, (Vec2){position.x-x, position.y+y}, (color.red << 16 | color.green << 8 | color.blue));
+    drawPoint_32bpp(Gop, (Vec2){position.x+x, position.y-y}, (color.red << 16 | color.green << 8 | color.blue));
+    drawPoint_32bpp(Gop, (Vec2){position.x-x, position.y-y}, (color.red << 16 | color.green << 8 | color.blue));
+    drawPoint_32bpp(Gop, (Vec2){position.x+y, position.y+x}, (color.red << 16 | color.green << 8 | color.blue));
+    drawPoint_32bpp(Gop, (Vec2){position.x-y, position.y+x}, (color.red << 16 | color.green << 8 | color.blue));
+    drawPoint_32bpp(Gop, (Vec2){position.x+y, position.y-x}, (color.red << 16 | color.green << 8 | color.blue));
+    drawPoint_32bpp(Gop, (Vec2){position.x-y, position.y-x}, (color.red << 16 | color.green << 8 | color.blue));
+}
+
 
 static inline void drawChar(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, CHAR8 character, Vec2 position, UINT32 foregroundColor) {
 
@@ -598,6 +610,53 @@ void drawRountedMenu(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL
 		TRUE);
 
 	freePool(SystemTable, ColorsArray);
+}
+
+void drawCircle(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Circle circle, Vec2 position) {
+
+	INTN d = 3 - 2 * circle.Radius, x = 0, y = circle.Radius;
+
+	if (circle.Filled == TRUE) {
+
+		bresenhamAlgorithm(Gop, position, circle.Colors, x, y);
+		while (x <= y) {
+
+            x++;
+            if (d <= 0) {
+                d += 4 * x + 6;
+            } else {
+
+                d += 4 * (x - y) + 10;
+                y--;
+            }
+
+            bresenhamAlgorithm(Gop, position, circle.Colors, x, y);
+        }
+	} else {
+
+		for (UINTN i = 0; i < circle.Radius; i++) {
+
+			d = 3 - 2 * i;
+    	    x = 0;
+	        y = i;
+
+			bresenhamAlgorithm(Gop, position, circle.Colors, x, y);
+			while (x <= y) {
+
+            	x++;
+        	    if (d <= 0) {
+
+    	            d += 4 * x + 6;
+	            } else {
+
+	                d += 4 * (x - y) + 10;
+                	y--;
+            	}
+
+				bresenhamAlgorithm(Gop, position, circle.Colors, x, y);
+        	}
+		}
+	}
 }
 
 void drawString(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, CHAR8 *string, Vec2 position, Vec3 color) {

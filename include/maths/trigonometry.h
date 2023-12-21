@@ -8,12 +8,8 @@ PS: J'ai rien compris à ce que je viens d'écrire
 #include <efi.h>
 #include <efilib.h>
 
-float cos(float Angle);
-float sin(float Angle);
-float tan(float Angle);
-
-float acos(float Angle);
-float asin(float Angle);
-float atan(float Angle);
+double cos(double Angle);
+double sin(double Angle);
+double tan(double Angle);
 
 #endif

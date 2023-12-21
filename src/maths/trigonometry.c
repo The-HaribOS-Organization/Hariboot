@@ -2,25 +2,30 @@
 #include <efilib.h>
 #include <maths/trigonometry.h>
 #include <maths/power.h>
+#include <maths/maths.h>
 
 
-float cos(float Angle) {
+double cos(double Angle) {
 
-    return (1 - (pow(Angle, 2) / factorial(2)) + (pow(Angle, 4) / factorial(4)) - (pow(Angle, 6) / factorial(6)) + (pow(Angle, 8) / factorial(8)));
+    float result = 1.0;
+    Angle = (PI * Angle) / 180;
+    for (UINTN i = 1; i < 5; i++)
+        result += pow(-1, i) * (pow(Angle, 2 * i) / factorial(2 * i));
+
+    return result;
 }
 
-float sin(float Angle) {
+double sin(double Angle) {
 
-    return (Angle - (pow(Angle, 3) / factorial(3)) + (pow(Angle, 5) / factorial(5)) - (pow(Angle, 7) / factorial(7)) + (pow(Angle, 9) / factorial(9)));
+    double result = 1.0;
+    Angle = (PI * Angle) / 180;
+    for (UINTN i = 1; i < 5; i++)
+        result += pow(-1, i) * (pow(Angle, 2 * i + 1) / factorial(2 * i + 1));
+
+    return Angle;
 }
 
-float tan(float Angle) {
+double tan(double Angle) {
 
-    return (Angle + (pow(Angle, 3) / 3) + (pow((2 * Angle), 5)));
+    return sin((Angle * 2 * PI) / 360) / cos((Angle * 2 * PI) / 360);
 }
-
-float acos(float Angle) { return Angle; }
-
-float asin(float Angle) { return Angle; }
-
-float atan(float Angle) { return Angle; }

@@ -15,6 +15,8 @@
 #include "system/sysservices.h"
 #include "uefi_gui/button.h"
 #include "system/rsdp.h"
+#include "maths/maths.h"
+#include "system/rng.h"
 
 
 Button_t *buttons[] = {};
@@ -122,6 +124,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
     EFI_STATUS Status;
     EFI_INPUT_KEY Key;
     EFI_INPUT_KEY KeyButtons;
+    EFI_RNG_PROTOCOL *RNGenerator;
     EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop;
     EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *gopMode;
 
@@ -142,6 +145,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
     setVideoMode(Gop, 0x13);
     
     initFileSystem(SystemTable, ImageHandle);
+
     configFile = readConfigFile(SystemTable);
     configStruct = parseConfigFile(SystemTable, configFile);
 
@@ -150,6 +154,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
         gopMode = getModeInfos(SystemTable, Gop, i);
         if ((gopMode->HorizontalResolution == configStruct->width) && (gopMode->VerticalResolution == configStruct->height)) setVideoMode(Gop, i);
     }
+    
 
     elfFile = readELFFile(SystemTable, L"KERNEL\\loader.bin");
     eheader = parseELFHeader(SystemTable, elfFile);
@@ -198,7 +203,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
     }
 
     resetTerm(SystemTable);
-    
+
     if (configStruct->hasLoadingBar == 0x1 && configStruct->whatLogo == 0x1) {
 
         showIcon(SystemTable, Gop, (Vec2){((Gop->Mode->Info->HorizontalResolution / 2) - (500 / 2)), ((Gop->Mode->Info->VerticalResolution / 2) - (500 / 2))}, (Vec2){500, 500}, L"Boot.bmp");
@@ -239,6 +244,25 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
             );
 
             createsAllButtons(SystemTable, Gop, (Vec3){184, 162, 247, 0xDD}, (Vec3){0xFF, 0xFF, 0xFF, 0x00}, (Vec3){0x0, 0x0, 0x0, 0x00});
+            freePool(SystemTable, configStruct);
+        } else if (configStruct->mode[0] == 0x42 && configStruct->mode[1] == 0x41 && configStruct->mode[2] == 0x4C && configStruct->mode[3] == 0x4C && configStruct->mode[4] == 0x53 && configStruct->mode[5] == 0x20) {
+
+            fillScreen(Gop, (Vec3){20, 20, 20, 0x0});
+
+            srand(10);
+            for (int i = 0; i < 350; i++)
+                drawCircle(Gop, (Circle){rand(150), (Vec3){rand(256), 70, rand(256)}, FALSE}, (Vec2){rand(Gop->Mode->Info->HorizontalResolution * 2), rand(Gop->Mode->Info->VerticalResolution * 2)});
+
+            drawRountedMenu(
+                SystemTable,
+                Gop,
+                (Vec2){(Gop->Mode->Info->HorizontalResolution / 2) - 400, (Gop->Mode->Info->VerticalResolution / 2) - 200}, (Vec2){(Gop->Mode->Info->HorizontalResolution / 2) + 400,
+                (Gop->Mode->Info->VerticalResolution / 2) + 200},
+                (Vec3){41, 39, 50, 0x30},
+                50
+            );
+
+            createsAllButtons(SystemTable, Gop, (Vec3){221, 90, 90, 0xDD}, (Vec3){0xFF, 0xFF, 0xFF, 0x00}, (Vec3){40, 32, 72, 0x10});
             freePool(SystemTable, configStruct);
         } else {
 

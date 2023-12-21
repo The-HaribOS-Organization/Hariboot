@@ -8,9 +8,9 @@
 #include <efilib.h>
 
 
-UINT64 pow(UINT64 Number, UINT64 power);
 UINT64 factorial(UINT64 Number);
-float exp(UINT64 Number);
-float sqrt(UINT64 Number);
+double pow(double Number, UINT32 power);
+double exp(double Number);
+double sqrt(double Number);
 
 #endif
