@@ -247,22 +247,22 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
             freePool(SystemTable, configStruct);
         } else if (configStruct->mode[0] == 0x42 && configStruct->mode[1] == 0x41 && configStruct->mode[2] == 0x4C && configStruct->mode[3] == 0x4C && configStruct->mode[4] == 0x53 && configStruct->mode[5] == 0x20) {
 
-            fillScreen(Gop, (Vec3){20, 20, 20, 0x0});
+            fillScreen(Gop, (Vec3){5, 8, 20, 0x0});
 
             srand(10);
-            for (int i = 0; i < 350; i++)
-                drawCircle(Gop, (Circle){rand(150), (Vec3){rand(256), 70, rand(256)}, FALSE}, (Vec2){rand(Gop->Mode->Info->HorizontalResolution * 2), rand(Gop->Mode->Info->VerticalResolution * 2)});
+            for (int i = 0; i < 250; i++)
+                drawCircle(Gop, (Circle){rand(150), (Vec3){255, rand(255), 10}, TRUE}, (Vec2){rand(Gop->Mode->Info->HorizontalResolution * 2), rand(Gop->Mode->Info->VerticalResolution * 2)});
 
             drawRountedMenu(
                 SystemTable,
                 Gop,
                 (Vec2){(Gop->Mode->Info->HorizontalResolution / 2) - 400, (Gop->Mode->Info->VerticalResolution / 2) - 200}, (Vec2){(Gop->Mode->Info->HorizontalResolution / 2) + 400,
                 (Gop->Mode->Info->VerticalResolution / 2) + 200},
-                (Vec3){41, 39, 50, 0x30},
+                (Vec3){0, 29, 61, 0x40},
                 50
             );
 
-            createsAllButtons(SystemTable, Gop, (Vec3){221, 90, 90, 0xDD}, (Vec3){0xFF, 0xFF, 0xFF, 0x00}, (Vec3){40, 32, 72, 0x10});
+            createsAllButtons(SystemTable, Gop, (Vec3){255, 195, 0, 0x60}, (Vec3){0xFF, 0xFF, 0xFF, 0x00}, (Vec3){0, 53, 102, 0x20});
             freePool(SystemTable, configStruct);
         } else {
 

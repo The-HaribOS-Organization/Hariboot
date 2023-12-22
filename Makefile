@@ -1,5 +1,5 @@
 # User defined values
-GNU-EFI_LOCALIZATION = ./gnu-efi
+GNU-EFI_LOCALIZATION = gnu-efi
 OVMF_LOCALIZATION = /usr/share/ovmf
 
 # Compiler
