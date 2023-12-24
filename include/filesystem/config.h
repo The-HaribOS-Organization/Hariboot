@@ -32,7 +32,7 @@ typedef struct config_file {
     UINT8 e_magic[8], mode[6];
     UINT8 hasLoadingBar, whatLogo, hasBackground;
     UINT16 width, height;
-    Vec3 background_color, background_menu, color_button, text_color, selected_color_button, loadingBarFrontColor, loadingBarBackColor;
+    Vec3 background_color[2], background_menu, color_button, text_color, selected_color_button, loadingBarFrontColor, loadingBarBackColor;
 } config_file_t;
 
 UINT8 *readConfigFile(EFI_SYSTEM_TABLE *SystemTable);

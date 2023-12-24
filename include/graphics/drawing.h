@@ -26,6 +26,12 @@ typedef struct Vec3 {
     UINT8 alpha;
 } Vec3;
 
+typedef struct Vec3f {
+    float red;
+    float green;
+    float blue;
+} Vec3f;
+
 typedef enum Axis {
     FROM_X,
     FROM_Y
@@ -64,6 +70,7 @@ void drawPoint_32bpp(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 position, UINT32 co
 void drawLine(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec2 posA, Vec2 posB, Vec3 pixel);
 void fillScreen(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec3 backgroundColor);
 void fillScreenDarkAndLightMode(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, UINT8 mode);
+void fillScreenLinearGradient(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec3 startColor, Vec3 endColor);
 void drawRect(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 posUpperLeft, Vec2 posDownRight, Vec3 pixel, BOOLEAN rectType);
 void drawRountedMenu(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 posUpperLeft, Vec2 posDownRight, Vec3 pixel, UINT32 radius);
 void drawCircle(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Circle circle, Vec2 position);

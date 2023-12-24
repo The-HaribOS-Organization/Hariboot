@@ -10,7 +10,7 @@ de mettre des delays ce qui sera utile par la suite.
 #include <efilib.h>
 
 
-void itoa(UINT32 number, CHAR16 *buffer, INT32 baseNumber);
+void itoa(UINT64 number, CHAR16 *buffer, INT32 baseNumber);
 void sleep(EFI_SYSTEM_TABLE *SystemTable, UINTN microseconds);
 void setWatchdogTimer(EFI_SYSTEM_TABLE *SystemTable, UINTN Timeout, UINT64 WatchdogCode, UINTN DataSize, CHAR16 *WatchdogData);
 UINT8 atoi(const CHAR8 *string);

@@ -19,6 +19,10 @@
 #include "system/rng.h"
 
 
+#define SEGMENT1 0xffffffff80000000
+#define SEGMENT2 0xffffffff80001010
+#define SEGMENT3 0xffffffff80002060
+
 Button_t *buttons[] = {};
 CHAR8 *strings[] = {
     "Demarrer le kernel en mode console.",
@@ -124,7 +128,6 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
     EFI_STATUS Status;
     EFI_INPUT_KEY Key;
     EFI_INPUT_KEY KeyButtons;
-    EFI_RNG_PROTOCOL *RNGenerator;
     EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop;
     EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *gopMode;
 
@@ -135,6 +138,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
     UINT8 index = 0, indexChecking = 0;
     Button_t *SelectedButton;
     void *Datas = NULL;
+    CHAR16 *buffer;
 
 
     enadisCursor(SystemTable, 0);
@@ -155,7 +159,6 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
         if ((gopMode->HorizontalResolution == configStruct->width) && (gopMode->VerticalResolution == configStruct->height)) setVideoMode(Gop, i);
     }
     
-
     elfFile = readELFFile(SystemTable, L"KERNEL\\loader.bin");
     eheader = parseELFHeader(SystemTable, elfFile);
     //pheader = parseELFProgramHeader(SystemTable, eheader->e_phoff, elfFile);
@@ -173,6 +176,11 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
     else if (eheader->e_type == 0x2) SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Type de segment: EXECUTABLE.\r\n");
     else if (eheader->e_type == 0x3) SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Type de segment: SHARED.\r\n");
     else SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Type de segment: CORE.\r\n");
+
+    itoa(eheader->e_entry, buffer, 16);
+    SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Entry point: 0x");
+    SystemTable->ConOut->OutputString(SystemTable->ConOut, buffer);
+    SystemTable->ConOut->OutputString(SystemTable->ConOut, L"\r\n");
 
     for (UINTN i = 0; i < eheader->e_phnum; i++) {
 
@@ -196,9 +204,15 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 
         if (progHeader.p_type == PT_LOAD) {
 
-            EFI_PHYSICAL_ADDRESS *p_vaddr = (EFI_PHYSICAL_ADDRESS *)allocPool(SystemTable, EfiLoaderData, sizeof(EFI_PHYSICAL_ADDRESS));
-            p_vaddr = (EFI_PHYSICAL_ADDRESS *)progHeader.p_vaddr;
-            allocPages(SystemTable, EfiLoaderData, (progHeader.p_memsz / 4096), p_vaddr);
+            itoa(progHeader.p_paddr, buffer, 16);
+            SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Physical Address: 0x");
+            SystemTable->ConOut->OutputString(SystemTable->ConOut, buffer);
+            SystemTable->ConOut->OutputString(SystemTable->ConOut, L"\r\n");
+
+            itoa(progHeader.p_vaddr, buffer, 16);
+            SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Virtual Address: 0x");
+            SystemTable->ConOut->OutputString(SystemTable->ConOut, buffer);
+            SystemTable->ConOut->OutputString(SystemTable->ConOut, L"\r\n");
         }
     }
 
@@ -266,7 +280,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
             freePool(SystemTable, configStruct);
         } else {
 
-            fillScreen(Gop, configStruct->background_color);
+            fillScreenLinearGradient(Gop, configStruct->background_color[0], configStruct->background_color[1]);
             drawRountedMenu(
                 SystemTable,
                 Gop,

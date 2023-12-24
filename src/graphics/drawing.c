@@ -407,6 +407,21 @@ void fillScreenDarkAndLightMode(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTP
 	}
 }
 
+void fillScreenLinearGradient(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec3 startColor, Vec3 endColor) {
+
+	for (float i = 0; i < Gop->Mode->Info->VerticalResolution + 1; i++) {
+
+		drawLine(
+			Gop,
+			(Vec2){0, i}, (Vec2){Gop->Mode->Info->HorizontalResolution, i},
+			(Vec3){
+				(1 - (i / Gop->Mode->Info->VerticalResolution)) * (float)startColor.red + (float)endColor.red * i / Gop->Mode->Info->VerticalResolution,
+                (1 - (i / Gop->Mode->Info->VerticalResolution)) * (float)startColor.green + (float)endColor.green * i / Gop->Mode->Info->VerticalResolution,
+                (1 - (i / Gop->Mode->Info->VerticalResolution)) * (float)startColor.blue + (float)endColor.blue * i / Gop->Mode->Info->VerticalResolution
+			});
+	}
+}
+
 void drawLine(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, Vec2 posA, Vec2 posB, Vec3 pixel) {
     UINT32 dx = posB.x - posA.x;
     UINT32 dy = posB.y - posA.y;

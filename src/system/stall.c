@@ -26,7 +26,7 @@ BOOLEAN strcmp(CHAR8 *firstString, CHAR8 *secondString) {
 	else return FALSE;
 }
 
-void itoa(UINT32 number, CHAR16 *buffer, INT32 baseNumber) {
+void itoa(UINT64 number, CHAR16 *buffer, INT32 baseNumber) {
 	
     UINT32 hold;
 	INT32 i, j;

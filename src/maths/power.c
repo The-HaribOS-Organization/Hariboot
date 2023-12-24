@@ -6,7 +6,7 @@
 double pow(double Number, UINT32 power) {
 
     if (power == 0) return 1;
-    else return pow(Number, power - 1);
+    else return Number * pow(Number, power - 1);
 }
 
 UINT64 factorial(UINT64 Number) {
