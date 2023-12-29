@@ -1,5 +1,6 @@
 #include <efi.h>
 #include <efilib.h>
+#include <efiapi.h>
 #include "memory/mmap.h"
 
 
@@ -12,11 +13,16 @@ void *allocPool(EFI_SYSTEM_TABLE *SystemTable, EFI_MEMORY_TYPE Type, UINTN Size)
     );
 
     if (Status != EFI_SUCCESS)
-        SystemTable->ConOut->OutputString(
-            SystemTable->ConOut, L"Une erreur est survenue, veuillez verifier le code d'erreur retourne.\r\n"
-        );
-    
-    return Buffer;
+        goto errorAlloc;
+    else
+        return Buffer;
+
+errorAlloc:
+
+    SystemTable->ConOut->OutputString(
+            SystemTable->ConOut, L"Une erreur est survenue, veuillez verifier le code d'erreur retourne.\r\n");
+    freePool(SystemTable, Buffer);
+    return NULL;
 }
 
 void freePool(EFI_SYSTEM_TABLE *SystemTable, void *Buffer) {
@@ -31,12 +37,12 @@ void freePool(EFI_SYSTEM_TABLE *SystemTable, void *Buffer) {
         );
 }
 
-void allocPages(EFI_SYSTEM_TABLE *SystemTable, EFI_MEMORY_TYPE Type, UINTN Pages, EFI_PHYSICAL_ADDRESS *adress) {
+void allocPages(EFI_SYSTEM_TABLE *SystemTable, UINTN Pages, EFI_PHYSICAL_ADDRESS *address) {
 
     EFI_STATUS Status;
-
     Status = SystemTable->BootServices->AllocatePages(
-        AllocateAddress, Type, Pages, adress);
+        AllocateMaxAddress, EfiLoaderData, Pages, address);
+
     switch (Status) {
         case EFI_SUCCESS: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Memoire virtuelle alloue.\r\n"); break;
         case EFI_OUT_OF_RESOURCES: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Erreur: Out of ressource.\r\n"); break;
@@ -58,22 +64,28 @@ void freePages(EFI_SYSTEM_TABLE *SystemTable, EFI_PHYSICAL_ADDRESS Memory, UINTN
 
 }
 
-EFI_MEMORY_DESCRIPTOR *getMmap(EFI_SYSTEM_TABLE* SystemTable, UINTN DescriptorSize, UINT32 DescriptorVersion) {
+EFI_MEMORY_DESCRIPTOR *getMmap(EFI_SYSTEM_TABLE* SystemTable, UINTN MapKey, UINTN DescriptorSize, UINT32 DescriptorVersion) {
 
     EFI_STATUS Status;
-    EFI_MEMORY_DESCRIPTOR *MMap;
+    EFI_MEMORY_DESCRIPTOR *MMap = NULL;
     UINTN MMapSize = 0;
-    UINTN MapKey;
 
-    SystemTable->BootServices->GetMemoryMap(
-        &MMapSize, MMap, &MapKey, &DescriptorSize, &DescriptorVersion
-    );
-
+    
+    Status = SystemTable->BootServices->GetMemoryMap(
+        &MMapSize, MMap, &MapKey, &DescriptorSize, &DescriptorVersion);
+    ASSERT(Status == EFI_BUFFER_TOO_SMALL);
+    
     MMapSize += 2 * DescriptorSize;
-    allocPool(SystemTable, EfiLoaderData, MMapSize);
-    SystemTable->BootServices->GetMemoryMap(
-        &MMapSize, MMap, &MapKey, &DescriptorSize, &DescriptorVersion
-    );
+    MMap = (EFI_MEMORY_DESCRIPTOR *)allocPool(SystemTable, EfiLoaderData, MMapSize);
+    ASSERT(MMap != NULL);
+
+    Status = SystemTable->BootServices->GetMemoryMap(
+        &MMapSize, MMap, &MapKey, &DescriptorSize, &DescriptorVersion);    
+    if (EFI_ERROR(Status)) goto error;
 
     return MMap;
+
+error:
+    freePool(SystemTable, MMap);
+    return NULL;
 }

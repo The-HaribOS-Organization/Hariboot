@@ -14,14 +14,11 @@
 #include "system/stall.h"
 #include "system/sysservices.h"
 #include "uefi_gui/button.h"
-#include "system/rsdp.h"
 #include "maths/maths.h"
 #include "system/rng.h"
+#include "system/rsdp.h"
+#include "hariboot.h"
 
-
-#define SEGMENT1 0xffffffff80000000
-#define SEGMENT2 0xffffffff80001010
-#define SEGMENT3 0xffffffff80002060
 
 Button_t *buttons[] = {};
 CHAR8 *strings[] = {
@@ -32,7 +29,7 @@ CHAR8 *strings[] = {
 };
 
 
-inline void setBackForeColor(EFI_SYSTEM_TABLE *SystemTable, UINT8 Fg, UINT8 Bg) {
+static inline void setBackForeColor(EFI_SYSTEM_TABLE *SystemTable, UINT8 Fg, UINT8 Bg) {
 
     SystemTable->ConOut->SetAttribute(SystemTable->ConOut, ((Bg << 4) | Fg));
 }
@@ -123,6 +120,7 @@ static void createsAllButtons(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT
     buttons[3] = buttonEXITBoot;
 }
 
+
 EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 
     EFI_STATUS Status;
@@ -132,14 +130,17 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
     EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *gopMode;
 
     Elf_Header *eheader;
-    UINT8 *elfFile, *configFile;
     config_file_t *configStruct;
-
-    UINT8 index = 0, indexChecking = 0;
     Button_t *SelectedButton;
+    hariboot_t bootStruct;
+
+    UINT8 *elfFile, *configFile;
+    UINT8 index = 0, indexChecking = 0;
+    UINT8 progHeaderIndex = 0;
+    UINTN DescriptorSize, MapKey;
+    UINT32 DescriptorVersion;
     void *Datas = NULL;
     CHAR16 *buffer;
-
 
     enadisCursor(SystemTable, 0);
     setBackForeColor(SystemTable, VGA_RED, VGA_WHITE);
@@ -147,7 +148,6 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 
     Gop = locateGOP(SystemTable);
     setVideoMode(Gop, 0x13);
-    
     initFileSystem(SystemTable, ImageHandle);
 
     configFile = readConfigFile(SystemTable);
@@ -161,7 +161,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
     
     elfFile = readELFFile(SystemTable, L"KERNEL\\loader.bin");
     eheader = parseELFHeader(SystemTable, elfFile);
-    //pheader = parseELFProgramHeader(SystemTable, eheader->e_phoff, elfFile);
+    struct segment_t *segmentsKernel = (struct segment_t *)allocPool(SystemTable, EfiLoaderData, sizeof(struct segment_t) * eheader->e_phnum);
 
     if (isELF(eheader)) SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Header ELF confirme.\r\n");
     else return -1;
@@ -213,6 +213,18 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
             SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Virtual Address: 0x");
             SystemTable->ConOut->OutputString(SystemTable->ConOut, buffer);
             SystemTable->ConOut->OutputString(SystemTable->ConOut, L"\r\n");
+
+            itoa(progHeader.p_memsz, buffer, 10);
+            SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Size of program header: ");
+            SystemTable->ConOut->OutputString(SystemTable->ConOut, buffer);
+            SystemTable->ConOut->OutputString(SystemTable->ConOut, L"\r\n");
+
+            segmentsKernel[progHeaderIndex].pAddress = (EFI_PHYSICAL_ADDRESS *)allocPool(SystemTable, EfiLoaderData, sizeof(EFI_PHYSICAL_ADDRESS));
+            segmentsKernel[progHeaderIndex].vAddress = (EFI_VIRTUAL_ADDRESS *)progHeader.p_vaddr;
+            segmentsKernel[progHeaderIndex].size = progHeader.p_memsz;
+
+            allocPages(SystemTable, (segmentsKernel[progHeaderIndex].size), segmentsKernel[progHeaderIndex].pAddress);
+            progHeaderIndex++;
         }
     }
 
@@ -280,7 +292,9 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
             freePool(SystemTable, configStruct);
         } else {
 
-            fillScreenLinearGradient(Gop, configStruct->background_color[0], configStruct->background_color[1]);
+            if (configStruct->hasBackground == 1) showIcon(SystemTable, Gop, (Vec2){0, 0}, (Vec2){configStruct->width, configStruct->height}, L"Background.bmp");
+            else fillScreenLinearGradient(Gop, configStruct->background_color[0], configStruct->background_color[1]);
+
             drawRountedMenu(
                 SystemTable,
                 Gop,

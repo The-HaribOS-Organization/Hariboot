@@ -15,6 +15,43 @@ static inline BOOLEAN isBitmap(BitmapHeader_t *header) {
         return FALSE;
 }
 
+static void drawIcon(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, UINT8 *headerArray, Vec2 Position, Vec2 IconSize, UINT8 bitPerPixel) {
+
+    Vec3 pixelValue;
+    if (bitPerPixel == 0x18) {
+        
+        for (UINT32 i = (Position.y + (IconSize.y - 1)); i > Position.y; i--) {
+
+            UINT8 *bitmapRow = (headerArray + headerArray[10]) + (i - Position.y) * IconSize.x * headerArray[0x1C] / 8;
+            UINT32 offset = 0;
+            for (UINT32 j = Position.x; j < (Position.x + IconSize.x); j++) {
+
+                pixelValue.blue = bitmapRow[offset++] & 0xFF;
+                pixelValue.green = bitmapRow[offset++] & 0xFF;
+                pixelValue.red = bitmapRow[offset++] & 0xFF;
+                
+                drawPoint_32bpp(Gop, (Vec2){j, i}, ((pixelValue.red << 16) | (pixelValue.green << 8) | pixelValue.blue));
+            }
+        }
+    } else if (bitPerPixel == 0x20) {
+
+        for (UINT32 i = (Position.y + (IconSize.y - 1)); i > Position.y; i--) {
+
+            UINT8 *bitmapRow = (headerArray + headerArray[10]) + (i - Position.y) * IconSize.x * headerArray[0x1C] / 8;
+            UINT32 offset = 0;
+            for (UINT32 j = Position.x; j < (Position.x + IconSize.x); j++) {
+
+                pixelValue.blue = bitmapRow[offset++] & 0xFF;
+                pixelValue.green = bitmapRow[offset++] & 0xFF;
+                pixelValue.red = bitmapRow[offset++] & 0xFF;
+                pixelValue.alpha = bitmapRow[offset++] & 0xFF;
+                
+                drawPoint_32bpp(Gop, (Vec2){j, i}, ((pixelValue.red << 16) | (pixelValue.green << 8) | pixelValue.blue));
+            }
+        }
+    }
+}
+
 UINT8 *readBitmapHeader(EFI_SYSTEM_TABLE *SystemTable, CHAR16 *Filename) {
 
     void *Result;
@@ -75,21 +112,7 @@ void showIcon(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop, 
 
     if (isBitmap(bheader)) {
 
-        for (UINT32 i = (Position.y + (IconSize.y - 1)); i > Position.y; i--) {
-
-            UINT8 *bitmapRow = (headerArray + headerArray[10]) + (i - Position.y) * IconSize.x * 4;
-            UINT32 offset = 0;
-            for (UINT32 j = Position.x; j < (Position.x + IconSize.x); j++) {
-
-                pixelValue.blue = bitmapRow[offset++] & 0xFF;
-                pixelValue.green = bitmapRow[offset++] & 0xFF;
-                pixelValue.red = bitmapRow[offset++] & 0xFF;
-                pixelValue.alpha = bitmapRow[offset++] & 0xFF;
-                
-                drawPoint_32bpp(Gop, (Vec2){j, i}, ((pixelValue.red << 16) | (pixelValue.green << 8) | pixelValue.blue));
-            }
-        }
-
+        drawIcon(Gop, headerArray, Position, IconSize, headerArray[0x1C]);
         freePool(SystemTable, headerArray);
         freePool(SystemTable, bheader);
     } else {

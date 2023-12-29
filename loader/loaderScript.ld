@@ -2,44 +2,24 @@ OUTPUT_FORMAT(elf64-x86-64)
 OUTPUT_ARCH(i386:x86-64)
 ENTRY(main)
 
-PHDRS {
-	text PT_LOAD FLAGS((1 << 0) | (1 << 2));
-	rodata PT_LOAD FLAGS((1 << 2));
-	data PT_LOAD FLAGS((1 << 1) | (1 << 2));
-	dynamic PT_DYNAMIC FLAGS((1 << 1) | (1 << 2));
-}
+SECTIONS {
 
-SECTIONS
-{
-	. = 0xffffffff80000000;
+	. = 0x00100000;
 
-	.text : {
-		*(.text .text.*)
-	} :text
+	.text BLOCK(4K) : ALIGN(4K) {
+		*(.text)
+	}
 
-	. += CONSTANT(MAXPAGESIZE);
+	.rodata BLOCK(4K) : ALIGN(4K) {
+		*(.rodata)
+	}
 
-	.rodata : {
-		*(.rodata .rodata.*)
-	} :rodata
+	.data BLOCK(4K) : ALIGN(4K) {
+		*(.data)
+	}
 
-	. += CONSTANT(MAXPAGESIZE);
-
-	.data : {
-		*(.data .data.*)
-	} :data
-
-	.dynamic : {
-		*(.dynamic)
-	} :data :dynamic
-
-	.bss : {
-		*(.bss .bss.*)
+	.bss BLOCK(4K) : ALIGN(4K) {
 		*(COMMON)
-	} :data
-
-	/DISCARD/ : {
-		*(.eh_frame)
-		*(.note .note.*)
+		*(.bss)
 	}
 }
