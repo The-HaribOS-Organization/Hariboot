@@ -228,7 +228,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
         }
     }
 
-    resetTerm(SystemTable);
+    /*resetTerm(SystemTable);
 
     if (configStruct->hasLoadingBar == 0x1 && configStruct->whatLogo == 0x1) {
 
@@ -344,7 +344,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
     } else if (indexChecking == 3) {
         resetTerm(SystemTable);
         Shutdown(SystemTable, sizeof(Datas), Datas);   
-    }
+    }*/
 
     //int (*KernelMain)(int) = ((__attribute__((sysv_abi)) int (*)(int))&elfFile[eheader->e_entry]);
 
