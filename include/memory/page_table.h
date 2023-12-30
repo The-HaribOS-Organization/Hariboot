@@ -20,16 +20,16 @@ struct page_entry_t {
     UINT32 address : 20;
 } __attribute__((packed));
 
-inline disablePaging() {
+inline void disablePaging() {
 
     UINT32 cr0;
     __asm__ volatile("mov %%cr0, %0" : "=r"(cr0));
 
-    cr0 ~= 0x80000000;
+    cr0 ^= 0x80000000;
     __asm__ volatile("mov %0, %%cr0" :: "r"(cr0));
 }
 
-inline enablePaging() {
+inline void enablePaging() {
 
     UINT32 cr0;
     __asm__ volatile("mov %%cr0, %0" : "=r"(cr0));

@@ -23,5 +23,5 @@ void loadPageTable() {
     fillTable();
 
     page_directory[0] = ((UINT32)page_table) | 3;
-    __asm__ volatile ("mov %0, %%cr3" :: "r"&page_directory);
+    __asm__ volatile ("mov %0, %%cr3" :: "r"(&page_directory));
 }
