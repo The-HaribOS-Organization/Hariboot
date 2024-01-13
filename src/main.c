@@ -7,6 +7,7 @@
 #include "io/output.h"
 #include "memory/mem.h"
 #include "memory/mmap.h"
+#include "memory/page_table.h"
 #include "filesystem/files.h"
 #include "filesystem/icons.h"
 #include "filesystem/elf.h"
@@ -17,6 +18,7 @@
 #include "maths/maths.h"
 #include "system/rng.h"
 #include "system/rsdp.h"
+#include "debug/serial_port.h"
 #include "hariboot.h"
 
 
@@ -128,17 +130,19 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
     EFI_INPUT_KEY KeyButtons;
     EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop;
     EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *gopMode;
+    EFI_MEMORY_DESCRIPTOR *EfiMemoryMap;
 
     Elf_Header *eheader;
     config_file_t *configStruct;
     Button_t *SelectedButton;
     hariboot_t bootStruct;
 
+    UINTN retries = 0;
     UINT8 *elfFile, *configFile;
     UINT8 index = 0, indexChecking = 0;
+    UINTN EfiMemoryMapSize, EfiMapKey, EfiDescriptorSize;
+    UINT32 EfiDescriptorVersion;
     UINT8 progHeaderIndex = 0;
-    UINTN DescriptorSize, MapKey;
-    UINT32 DescriptorVersion;
     void *Datas = NULL;
     CHAR16 *buffer;
 
@@ -149,6 +153,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
     Gop = locateGOP(SystemTable);
     setVideoMode(Gop, 0x13);
     initFileSystem(SystemTable, ImageHandle);
+    initSerialPort(SERIAL_COM1);    
 
     configFile = readConfigFile(SystemTable);
     configStruct = parseConfigFile(SystemTable, configFile);
@@ -163,8 +168,12 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
     eheader = parseELFHeader(SystemTable, elfFile);
     struct segment_t *segmentsKernel = (struct segment_t *)allocPool(SystemTable, EfiLoaderData, sizeof(struct segment_t) * eheader->e_phnum);
 
-    if (isELF(eheader)) SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Header ELF confirme.\r\n");
-    else return -1;
+    if (isELF(eheader)) {
+        SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Header ELF confirme.\r\n");
+    } else {
+        freePool(SystemTable, eheader);
+        freePool(SystemTable, elfFile);
+    }
 
     if (eheader->e_ident[EL_CLASS] == 0x1) SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Fichier ELF 32 bits.\r\n");
     else SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Fichier ELF 64 bits.\r\n");
@@ -228,7 +237,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
         }
     }
 
-    /*resetTerm(SystemTable);
+    resetTerm(SystemTable);
 
     if (configStruct->hasLoadingBar == 0x1 && configStruct->whatLogo == 0x1) {
 
@@ -270,7 +279,6 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
             );
 
             createsAllButtons(SystemTable, Gop, (Vec3){184, 162, 247, 0xDD}, (Vec3){0xFF, 0xFF, 0xFF, 0x00}, (Vec3){0x0, 0x0, 0x0, 0x00});
-            freePool(SystemTable, configStruct);
         } else if (configStruct->mode[0] == 0x42 && configStruct->mode[1] == 0x41 && configStruct->mode[2] == 0x4C && configStruct->mode[3] == 0x4C && configStruct->mode[4] == 0x53 && configStruct->mode[5] == 0x20) {
 
             fillScreen(Gop, (Vec3){5, 8, 20, 0x0});
@@ -289,7 +297,6 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
             );
 
             createsAllButtons(SystemTable, Gop, (Vec3){255, 195, 0, 0x60}, (Vec3){0xFF, 0xFF, 0xFF, 0x00}, (Vec3){0, 53, 102, 0x20});
-            freePool(SystemTable, configStruct);
         } else {
 
             if (configStruct->hasBackground == 1) showIcon(SystemTable, Gop, (Vec2){0, 0}, (Vec2){configStruct->width, configStruct->height}, L"Background.bmp");
@@ -305,12 +312,12 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
             );
 
             createsAllButtons(SystemTable, Gop, configStruct->selected_color_button, configStruct->text_color, configStruct->color_button);
-            freePool(SystemTable, configStruct);
         }
     } else {
-
-        SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Fichier de configuration invalide.\r\n");
+        SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Erreur, le fichier de configuration est invalide.\r\n");
     }
+
+    freePool(SystemTable, configStruct);
 
     do {
         
@@ -344,10 +351,58 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
     } else if (indexChecking == 3) {
         resetTerm(SystemTable);
         Shutdown(SystemTable, sizeof(Datas), Datas);   
-    }*/
+    }
 
-    //int (*KernelMain)(int) = ((__attribute__((sysv_abi)) int (*)(int))&elfFile[eheader->e_entry]);
+    EfiMemoryMapSize = 0;
+    EfiMemoryMap = NULL;
 
-    while ((Status = SystemTable->ConIn->ReadKeyStroke(SystemTable->ConIn, &Key)) == EFI_NOT_READY);
+    Status = SystemTable->BootServices->GetMemoryMap(
+        &EfiMemoryMapSize,
+        EfiMemoryMap,
+        &EfiMapKey,
+        &EfiDescriptorSize,
+        &EfiDescriptorVersion);
+    
+    ASSERT(Status == EFI_BUFFER_TOO_SMALL);
+
+    EfiMemoryMap = (EFI_MEMORY_DESCRIPTOR *)allocPool(SystemTable, EfiLoaderData, EfiMemoryMapSize + 2 * EfiDescriptorSize);
+    ASSERT(EfiMemoryMap != NULL);
+
+    Status = SystemTable->BootServices->GetMemoryMap(
+        &EfiMemoryMapSize,
+        EfiMemoryMap,
+        &EfiMapKey,
+        &EfiDescriptorSize,
+        &EfiDescriptorVersion);
+
+    if (EFI_ERROR(Status)) {
+        SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Unable to get memory map.\r\n");
+        freePool(SystemTable, (void *)EfiMemoryMap);
+    } else {
+        SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Getting memory map successfully !!!\r\n");
+    }
+
+    EFI_MEMORY_DESCRIPTOR *EfiEntry = EfiMemoryMap;
+    do {
+        EfiEntry = NextMemoryDescriptor(EfiEntry, EfiDescriptorSize);
+    } while ((UINT8 *)EfiEntry < (UINT8 *)EfiMemoryMap + EfiMemoryMapSize);
+
+    while (SystemTable->BootServices->ExitBootServices(ImageHandle, EfiMapKey) != EFI_SUCCESS) {
+    
+        SystemTable->BootServices->GetMemoryMap(&EfiMemoryMapSize, EfiMemoryMap, &EfiMapKey, &EfiDescriptorSize, &EfiDescriptorVersion);
+    }
+    printString(SERIAL_COM1, "UEFI exited successfully.");
+    drawString(Gop, "On a quitté UEFI enfin trop cool !!!!", (Vec2){150, 50}, (Vec3){125, 50, 255, 0});
+
+retry:
+    Status = SystemTable->BootServices->GetMemoryMap(&EfiMemoryMapSize, EfiMemoryMap, &EfiMapKey, &EfiDescriptorSize, &EfiDescriptorVersion);
+    if (retries == 0 && Status) goto fail;
+
+fail:
+    printString(SERIAL_COM1, "Unable to exit UEFI successfully.");
+
+    //loadPageTable();
+    //drawString(Gop, "Loaded page table successfully.", (Vec2){150, 20}, (Vec3){255, 125, 0});
+
     return EFI_SUCCESS;
 }

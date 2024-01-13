@@ -8,6 +8,8 @@ NASM = nasm
 NASMFLAG = -fwin64
 CXXFLAGS = -target x86_64-unknown-windows -ffreestanding -fshort-wchar -mno-red-zone
 INCLUDE_HEADERS = -Iinclude -I$(GNU-EFI_LOCALIZATION)/inc -I$(GNU-EFI_LOCALIZATION)/inc/x86_64 -I$(GNU-EFI_LOCALIZATION)/inc/protocol
+SECTIONS = .text .sdata .data .dynamic .dynsym .rel .rela .reloc
+DEBUG_SECTIONS = .debug_info .debug_abbrev .debug_loc .debug_aranges .debug_line .debug_macinfo .debug_str
 
 # Files
 SRCS := $(wildcard src/*.c) $(wildcard src/**/*.c) $(wildcard src/*.asm) $(wildcard src/**/*.asm)
@@ -19,6 +21,9 @@ LDFLAGS = -target x86_64-unknown-windows -nostdlib -Wl,-entry:efi_main -Wl,-subs
 
 
 hariboot: $(OBJS) build iso
+
+haribootDebug:
+	objcopy $(foreach sec,$(SECTIONS),-j $(sec)) --target=efi-app-x86_64 BOOTX64.EFI BOOTX64DEBUG.EFI
 
 $(OBJ_DIR)/%.o: src/%.c
 	@ mkdir -p $(@D)
@@ -50,10 +55,10 @@ iso:
 	xorriso -as mkisofs -R -f -e fat.img -no-emul-boot -o iso/HaribOS.iso iso
 
 run:
-	qemu-system-x86_64 -drive file=iso/fat.img -m 2048 -cpu qemu64 -drive if=pflash,format=raw,unit=0,file="$(OVMF_LOCALIZATION)/OVMF.fd",readonly=on -net none -d int
+	qemu-system-x86_64 -drive file=iso/fat.img -m 2048 -cpu qemu64 -drive if=pflash,format=raw,unit=0,file="$(OVMF_LOCALIZATION)/OVMF.fd",readonly=on -net none -serial pty -d int
 
 run-debug:
-	qemu-system-x86_64 -drive file=iso/fat.img -m 256M -cpu qemu64 -drive if=pflash,format=raw,unit=0,file="$(OVMF_LOCALIZATION)/OVMF.fd",readonly=on -net none -d int -serial tcp::666,server -s -S
+	qemu-system-x86_64 -L iso/fat.img -bios /usr/share/ovmf/OVMF.fd -m 1024 -cpu qemu64 -vga cirrus -monitor stdio -serial tcp::666,server -s -hdb iso/fat.img
 
 clean:
 	rm -rf $(OBJ_DIR)

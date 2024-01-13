@@ -1,0 +1,51 @@
+[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01HBdsDxe: failed to load Boot0001 "UEFI QEMU DVD-ROM QM00003 " from PciRoot(0x0)/Pci(0x1,0x1)/Ata(Secondary,Master,0x0): Not Found
+BdsDxe: loading Boot0002 "UEFI QEMU HARDDISK QM00001 " from PciRoot(0x0)/Pci(0x1,0x1)/Ata(Primary,Master,0x0)
+BdsDxe: starting Boot0002 "UEFI QEMU HARDDISK QM00001 " from PciRoot(0x0)/Pci(0x1,0x1)/Ata(Primary,Master,0x0)
+[2J[01;01H[=3h[2J[01;01H®Fichier ouvert avec succes.
+Fichier ferme avec succes.
+Fichier ouvert avec succes.
+Fichier ferme avec succes.
+[2J[01;01H[=3h[2J[01;01HHeader ELF confirme.
+Fichier ELF 64 bits.
+Fichier ELF essentiellement Little Endian.
+Type de segment: EXECUTABLE.
+Entry point: 0x100000
+PT_PHDR Segment found.
+PT_INTERP Segment found.
+PT_LOAD Segment found.
+Physical Address: 0xff000
+Virtual Address: 0xff000
+Size of program header: 624
+Memoire virtuelle alloue.
+PT_LOAD Segment found.
+Physical Address: 0x100000
+Virtual Address: 0x100000
+Size of program header: 464
+Memoire virtuelle alloue.
+PT_DYNAMIC Segment found.
+PT_NOTE Segment found.
+PT_NOTE Segment found.
+No Segment Found.
+No Segment Found.
+No Segment Found.
+[2J[01;01H[=3h[2J[01;01HFichier ouvert avec succes.
+Fichier ferme avec succes.
+[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01HGetting memory map successfully !!!
+UEFI exited successfully.!!!! X64 Exception Type - 06(#UD - Invalid Opcode)  CPU Apic ID - 00000000 !!!!
+RIP  - 00000000000B0000, CS  - 0000000000000038, RFLAGS - 0000000000000002
+RAX  - 0000000000000000, RCX - 000000007FEFA7A8, RDX - 000000007E532018
+RBX  - 0000000000000000, RSP - 000000007FEFA5A8, RBP - 000000007E67A898
+RSI  - 000000007E5E9320, RDI - 000000007E53B798
+R8   - 000000007FEFA7A0, R9  - 000000007FEFA798, R10 - 000000007FEFA794
+R11  - 00000000BA626FF9, R12 - 000000007EA3213C, R13 - 0000000000000000
+R14  - 0000000000000000, R15 - 000000007DF93018
+DS   - 0000000000000030, ES  - 0000000000000030, FS  - 0000000000000030
+GS   - 0000000000000030, SS  - 0000000000000030
+CR0  - 0000000080010033, CR2 - 0000000000000000, CR3 - 000000007F801000
+CR4  - 0000000000000668, CR8 - 0000000000000000
+DR0  - 0000000000000000, DR1 - 0000000000000000, DR2 - 0000000000000000
+DR3  - 0000000000000000, DR6 - 00000000FFFF0FF0, DR7 - 0000000000000400
+GDTR - 000000007F5DC000 0000000000000047, LDTR - 0000000000000000
+IDTR - 000000007F050018 0000000000000FFF,   TR - 0000000000000000
+FXSAVE_STATE - 000000007FEFA200
+!!!! Can't find image information. !!!!

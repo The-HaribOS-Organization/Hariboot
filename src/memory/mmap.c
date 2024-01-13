@@ -1,6 +1,7 @@
 #include <efi.h>
 #include <efilib.h>
 #include <efiapi.h>
+#include <stddef.h>
 #include "memory/mmap.h"
 
 
@@ -64,28 +65,41 @@ void freePages(EFI_SYSTEM_TABLE *SystemTable, EFI_PHYSICAL_ADDRESS Memory, UINTN
 
 }
 
-EFI_MEMORY_DESCRIPTOR *getMmap(EFI_SYSTEM_TABLE* SystemTable, UINTN MapKey, UINTN DescriptorSize, UINT32 DescriptorVersion) {
+EFI_MEMORY_DESCRIPTOR *getMmap(EFI_SYSTEM_TABLE* SystemTable, UINTN MapKey, UINTN DescriptorSize, UINT32 DescriptorVersion, UINTN MMapSize) {
 
+    MMapSize = 0;
     EFI_STATUS Status;
     EFI_MEMORY_DESCRIPTOR *MMap = NULL;
-    UINTN MMapSize = 0;
 
-    
     Status = SystemTable->BootServices->GetMemoryMap(
-        &MMapSize, MMap, &MapKey, &DescriptorSize, &DescriptorVersion);
-    ASSERT(Status == EFI_BUFFER_TOO_SMALL);
+        &MMapSize,
+        MMap,
+        &MapKey,
+        &DescriptorSize,
+        &DescriptorVersion);
     
-    MMapSize += 2 * DescriptorSize;
-    MMap = (EFI_MEMORY_DESCRIPTOR *)allocPool(SystemTable, EfiLoaderData, MMapSize);
+    ASSERT(Status == EFI_BUFFER_TOO_SMALL);
+
+    MMap = (EFI_MEMORY_DESCRIPTOR *)allocPool(SystemTable, EfiLoaderData, MMapSize + 2 * DescriptorSize);
     ASSERT(MMap != NULL);
 
     Status = SystemTable->BootServices->GetMemoryMap(
-        &MMapSize, MMap, &MapKey, &DescriptorSize, &DescriptorVersion);    
-    if (EFI_ERROR(Status)) goto error;
+        &MMapSize,
+        MMap,
+        &MapKey,
+        &DescriptorSize,
+        &DescriptorVersion);
+
+    if (EFI_ERROR(Status)) goto fail;
+
+    EFI_MEMORY_DESCRIPTOR *EfiEntry = MMap;
+    do {
+        EfiEntry = NextMemoryDescriptor(EfiEntry, DescriptorSize);
+    } while ((UINT8 *)EfiEntry < (UINT8 *)MMap + MMapSize);
 
     return MMap;
 
-error:
-    freePool(SystemTable, MMap);
-    return NULL;
+fail:
+    SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Unable to get memory map.\r\n");
+    freePool(SystemTable, (void *)MMap);
 }
