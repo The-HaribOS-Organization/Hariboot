@@ -42,7 +42,7 @@ void allocPages(EFI_SYSTEM_TABLE *SystemTable, UINTN Pages, EFI_PHYSICAL_ADDRESS
 
     EFI_STATUS Status;
     Status = SystemTable->BootServices->AllocatePages(
-        AllocateMaxAddress, EfiLoaderData, Pages, address);
+        AllocateAddress, EfiLoaderData, Pages, address);
 
     switch (Status) {
         case EFI_SUCCESS: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Memoire virtuelle alloue.\r\n"); break;
@@ -102,4 +102,5 @@ EFI_MEMORY_DESCRIPTOR *getMmap(EFI_SYSTEM_TABLE* SystemTable, UINTN MapKey, UINT
 fail:
     SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Unable to get memory map.\r\n");
     freePool(SystemTable, (void *)MMap);
+    return NULL;
 }

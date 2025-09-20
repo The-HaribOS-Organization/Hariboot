@@ -46,7 +46,7 @@ iso:
 	mmd -i fat.img ::/CONFIG
 	mcopy -i fat.img BOOTX64.EFI ::/EFI/BOOT
 	mcopy -i fat.img startup.nsh ::
-	mcopy -i fat.img loader/loader.bin ::/KERNEL
+	mcopy -i fat.img loader/kernel.bin ::/KERNEL
 	mcopy -i fat.img config/config.hariboot ::/CONFIG
 	mcopy -i fat.img images/Boot.bmp ::
 	mcopy -i fat.img images/Background.bmp ::
@@ -66,4 +66,4 @@ clean:
 	rm -f fat.img
 	rm -rf iso/
 
-.PHONY: all run build iso clean
+.PHONY: hariboot run build iso clean

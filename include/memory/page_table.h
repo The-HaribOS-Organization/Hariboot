@@ -5,20 +5,8 @@
 #include <efi.h>
 #include <efilib.h>
 
-
-struct page_entry_t {
-    UINT32 p : 1;
-    UINT32 rw : 1;
-    UINT32 us : 1;
-    UINT32 pwt : 1;
-    UINT32 pcd : 1;
-    UINT32 a : 1;
-    UINT32 d : 1;
-    UINT32 pat : 1;
-    UINT32 g : 1;
-    UINT32 avl : 3;
-    UINT32 address : 20;
-} __attribute__((packed));
+#define PAGE_DIRECTORY_INDEX(x) (((x) >> 22) & 0x3ff)
+#define PAGE_TABLE_INDEX(x) (((x) >> 12) & 0x3ff)
 
 inline void disablePaging() {
 

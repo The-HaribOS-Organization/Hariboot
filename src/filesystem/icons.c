@@ -77,7 +77,6 @@ BitmapHeader_t *parseBitmapHeader(EFI_SYSTEM_TABLE *SystemTable, UINT8 *bitmapAr
 
     bitmapHeader->HeaderField = (bitmapArray[0] << 8) | bitmapArray[1];
     bitmapHeader->Size = (bitmapArray[2] << 24) | (bitmapArray[3] << 16) | (bitmapArray[4] << 8) | bitmapArray[5];
-    bitmapHeader->Size = (bitmapArray[2] << 24) | (bitmapArray[3] << 16) | (bitmapArray[4] << 8) | bitmapArray[5];
     bitmapHeader->Reserved[0] = (bitmapArray[6] << 8) | bitmapArray[7];
     bitmapHeader->Reserved[1] = (bitmapArray[8] << 8) | bitmapArray[9];
     bitmapHeader->OffsetPixelArray = (bitmapArray[10] << 24) | (bitmapArray[11] << 16) | (bitmapArray[12] << 8) | bitmapArray[13];

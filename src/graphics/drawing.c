@@ -469,7 +469,6 @@ void drawRect(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 posUpperLeft, Vec2 posDown
             }
         }
     }
-    // filled
 }
 
 void drawRountedMenu(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, Vec2 posUpperLeft, Vec2 posDownRight, Vec3 pixel, UINT32 radius) {
@@ -495,7 +494,7 @@ void drawRountedMenu(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT_PROTOCOL
 		for (float t = 0; t < 1.001; t+=0.001) {
 
     	    pointToDraw = (Vec2){((1 - t) * (1 - t) * pointReference.x + 2 * (1 - t) * (secondPoint.x - i) * t + t * t * (firstPoint.x + i)),
-			((1 - t) * (1 - t) * (pointReference.y  + i) + 2 * (1 - t) * (secondPoint.y + i) * t + t * t * firstPoint.y)};
+			((1 - t) * (1 - t) * (pointReference.y + i) + 2 * (1 - t) * (secondPoint.y + i) * t + t * t * firstPoint.y)};
 
 			ColorsRead = getPixelValue(gop, pointToDraw);
 			ColorsArray[i].red = ColorsRead.red;

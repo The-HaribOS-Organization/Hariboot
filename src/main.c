@@ -1,6 +1,6 @@
+#include <stdint.h>
 #include <efi.h>
 #include <efilib.h>
-
 #include "graphics/gop.h"
 #include "graphics/colors.h"
 #include "graphics/drawing.h"
@@ -15,12 +15,14 @@
 #include "system/stall.h"
 #include "system/sysservices.h"
 #include "uefi_gui/button.h"
-#include "maths/maths.h"
-#include "system/rng.h"
+#include "misc/maths.h"
+#include "misc/rng.h"
 #include "system/rsdp.h"
 #include "debug/serial_port.h"
 #include "hariboot.h"
 
+
+typedef int (*kernel_entry_t)(void) __attribute__((sysv_abi));
 
 Button_t *buttons[] = {};
 CHAR8 *strings[] = {
@@ -123,6 +125,7 @@ static void createsAllButtons(EFI_SYSTEM_TABLE *SystemTable, EFI_GRAPHICS_OUTPUT
 }
 
 
+
 EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 
     EFI_STATUS Status;
@@ -164,9 +167,8 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
         if ((gopMode->HorizontalResolution == configStruct->width) && (gopMode->VerticalResolution == configStruct->height)) setVideoMode(Gop, i);
     }
     
-    elfFile = readELFFile(SystemTable, L"KERNEL\\loader.bin");
+    elfFile = readELFFile(SystemTable, L"KERNEL\\kernel.bin");
     eheader = parseELFHeader(SystemTable, elfFile);
-    struct segment_t *segmentsKernel = (struct segment_t *)allocPool(SystemTable, EfiLoaderData, sizeof(struct segment_t) * eheader->e_phnum);
 
     if (isELF(eheader)) {
         SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Header ELF confirme.\r\n");
@@ -191,53 +193,8 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
     SystemTable->ConOut->OutputString(SystemTable->ConOut, buffer);
     SystemTable->ConOut->OutputString(SystemTable->ConOut, L"\r\n");
 
-    for (UINTN i = 0; i < eheader->e_phnum; i++) {
-
-        Elf_Program_Header progHeader;
-        memcpy(&progHeader, (elfFile + eheader->e_phoff + eheader->e_phentsize * i), sizeof(Elf_Program_Header));
-
-        switch (progHeader.p_type) {
-            case PT_NULL: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PT_NULL Segment found.\r\n"); break;
-            case PT_LOAD: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PT_LOAD Segment found.\r\n"); break;
-            case PT_DYNAMIC: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PT_DYNAMIC Segment found.\r\n"); break;
-            case PT_INTERP: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PT_INTERP Segment found.\r\n"); break;
-            case PT_NOTE: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PT_NOTE Segment found.\r\n"); break;
-            case PT_SHLIB: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PT_SHLIB Segment found.\r\n"); break;
-            case PT_PHDR: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PT_PHDR Segment found.\r\n"); break;
-            case PT_LOOS: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PT_LOOS Segment found.\r\n"); break;
-            case PT_HIOS: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PT_HIOS Segment found.\r\n"); break;
-            case PT_LOPROC: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PT_LOPROC Segment found.\r\n"); break;
-            case PT_HIPROC: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"PT_HIPROC Segment found.\r\n"); break;
-            default: SystemTable->ConOut->OutputString(SystemTable->ConOut, L"No Segment Found.\r\n"); break;
-        }
-
-        if (progHeader.p_type == PT_LOAD) {
-
-            itoa(progHeader.p_paddr, buffer, 16);
-            SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Physical Address: 0x");
-            SystemTable->ConOut->OutputString(SystemTable->ConOut, buffer);
-            SystemTable->ConOut->OutputString(SystemTable->ConOut, L"\r\n");
-
-            itoa(progHeader.p_vaddr, buffer, 16);
-            SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Virtual Address: 0x");
-            SystemTable->ConOut->OutputString(SystemTable->ConOut, buffer);
-            SystemTable->ConOut->OutputString(SystemTable->ConOut, L"\r\n");
-
-            itoa(progHeader.p_memsz, buffer, 10);
-            SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Size of program header: ");
-            SystemTable->ConOut->OutputString(SystemTable->ConOut, buffer);
-            SystemTable->ConOut->OutputString(SystemTable->ConOut, L"\r\n");
-
-            segmentsKernel[progHeaderIndex].pAddress = (EFI_PHYSICAL_ADDRESS *)allocPool(SystemTable, EfiLoaderData, sizeof(EFI_PHYSICAL_ADDRESS));
-            segmentsKernel[progHeaderIndex].vAddress = (EFI_VIRTUAL_ADDRESS *)progHeader.p_vaddr;
-            segmentsKernel[progHeaderIndex].size = progHeader.p_memsz;
-
-            allocPages(SystemTable, (segmentsKernel[progHeaderIndex].size), segmentsKernel[progHeaderIndex].pAddress);
-            progHeaderIndex++;
-        }
-    }
-
-    resetTerm(SystemTable);
+    sleep(SystemTable, 1000000000000);
+    /*resetTerm(SystemTable);
 
     if (configStruct->hasLoadingBar == 0x1 && configStruct->whatLogo == 0x1) {
 
@@ -387,22 +344,20 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
         EfiEntry = NextMemoryDescriptor(EfiEntry, EfiDescriptorSize);
     } while ((UINT8 *)EfiEntry < (UINT8 *)EfiMemoryMap + EfiMemoryMapSize);
 
-    while (SystemTable->BootServices->ExitBootServices(ImageHandle, EfiMapKey) != EFI_SUCCESS) {
-    
+    while (TRUE) {
+
         SystemTable->BootServices->GetMemoryMap(&EfiMemoryMapSize, EfiMemoryMap, &EfiMapKey, &EfiDescriptorSize, &EfiDescriptorVersion);
+        EFI_STATUS status = SystemTable->BootServices->ExitBootServices(ImageHandle, EfiMapKey);
+        if (status == EFI_SUCCESS) break;
     }
     printString(SERIAL_COM1, "UEFI exited successfully.");
-    drawString(Gop, "On a quitté UEFI enfin trop cool !!!!", (Vec2){150, 50}, (Vec3){125, 50, 255, 0});
 
 retry:
     Status = SystemTable->BootServices->GetMemoryMap(&EfiMemoryMapSize, EfiMemoryMap, &EfiMapKey, &EfiDescriptorSize, &EfiDescriptorVersion);
     if (retries == 0 && Status) goto fail;
 
 fail:
-    printString(SERIAL_COM1, "Unable to exit UEFI successfully.");
-
-    //loadPageTable();
-    //drawString(Gop, "Loaded page table successfully.", (Vec2){150, 20}, (Vec3){255, 125, 0});
+    printString(SERIAL_COM1, "Unable to exit UEFI successfully.");*/
 
     return EFI_SUCCESS;
 }

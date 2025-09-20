@@ -13,8 +13,8 @@ utiles pour allouer ou non de la mémoire avec UEFI.
 #define PAGE_SIZE 0x1000
 
 struct segment_t {
-    EFI_PHYSICAL_ADDRESS *pAddress;
-    EFI_VIRTUAL_ADDRESS *vAddress;
+    EFI_PHYSICAL_ADDRESS pAddress;
+    EFI_VIRTUAL_ADDRESS vAddress;
     UINTN size;
 } __attribute__((packed));
 

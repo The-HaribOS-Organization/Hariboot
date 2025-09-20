@@ -73,10 +73,10 @@ void printString(UINT16 comPort, const CHAR8 *string) {
 BOOLEAN initSerialPort(UINT16 comPort) {
 
     disableInterrupt(comPort);
-    setBaudRate(comPort, 0x0);
+    setBaudRate(comPort, 0x00);
     setDataBits(comPort, 8);
     setStopBit(comPort, FALSE);
-    setParityBit(comPort, 0x0);
+    setParityBit(comPort, 0x00);
     enableFIFO(comPort);
 
     outb(comPort + 0, 0xAE);
